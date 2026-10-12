@@ -1,4 +1,4 @@
-"""Caché en disco de resultados costosos (GridSearchCV, barridos de K-Means).
+"""Caché en disco de resultados costosos (GridSearchCV, entrenamientos de redes).
 
 La primera vez que se pide algo se calcula y se guarda en cache/<nombre>.joblib.
 Las siguientes veces se carga en < 1 s. Así, en el menú, pedir "ver la matriz de
@@ -24,7 +24,7 @@ from config import CACHE_DIR, ROOT
 _memoria = {}  # caché en RAM para la sesión actual: nombre -> (huella, valor)
 
 # Carpetas y archivos del proyecto que cuentan para la huella (no .venv ni librerías)
-_CARPETAS_PROYECTO = ("etapas", "src", "webapp")
+_CARPETAS_PROYECTO = ("etapas", "src")
 _ARCHIVOS_PROYECTO = ("config.py",)
 
 

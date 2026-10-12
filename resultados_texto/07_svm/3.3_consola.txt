@@ -1,0 +1,16 @@
+Varianza explicada por PC1 y PC2: 0.140 + 0.117 = 0.256
+   [figura guardada] figures/07_svm/3.3_frontera_pca.png
+
+--- SVC reentrenado sobre 2 componentes PCA (sólo para visualizar) ---
+                                params (de la grilla de A)  accuracy test en 2D  n_vectores_soporte en 2D
+linear                                         {'C': 1000}               0.4043                      1547
+poly    {'C': 100, 'coef0': 1, 'degree': 3, 'gamma': 0.01}               0.4450                      1475
+rbf                         {'C': 100000, 'gamma': 0.0001}               0.4211                      1496
+
+
+Esta figura es SÓLO una visualización: cada SVC se reentrena con las 2 primeras componentes
+principales (que retienen el 25.6 % de la varianza de las 20 features
+escaladas), con los hiperparámetros elegidos para su kernel en la variante A. Su accuracy en
+2D no es la del modelo real (paso 3), que usa las 20 features. Lo que muestra es la FORMA
+de la frontera: rectas en linear, curvas polinómicas en poly y regiones flexibles en rbf.
+

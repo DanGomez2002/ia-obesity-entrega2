@@ -1,0 +1,6 @@
+[A] GaussianNB: {'var_smoothing': 0.0001} | CategoricalNB: {'discretizar__bins__n_bins': 25, 'nb__alpha': 0.01}
+   [calculando] nb_variante_B ... (la primera vez tarda; luego queda en cache/)
+   [B] GaussianNB: mejores params = {'var_smoothing': 0.001}
+   [B] CategoricalNB: mejores params = {'discretizar__bins__n_bins': 20, 'nb__alpha': 0.1}
+[B] GaussianNB: {'var_smoothing': 0.001} | CategoricalNB: {'discretizar__bins__n_bins': 20, 'nb__alpha': 0.1}
+   [figura guardada] figures/06_naive_bayes/3.2_hiperparametros_nb.png

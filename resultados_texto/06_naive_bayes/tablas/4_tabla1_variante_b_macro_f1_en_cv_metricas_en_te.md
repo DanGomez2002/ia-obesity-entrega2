@@ -1,0 +1,7 @@
+### Variante B — macro-F1 en CV, métricas en test, log-loss y tiempo
+
+|               |   cv_f1_macro |   test_accuracy |   test_f1_macro |   test_log_loss |   test_confianza_media |   tiempo_fit_s |
+|:--------------|--------------:|----------------:|----------------:|----------------:|-----------------------:|---------------:|
+| GaussianNB    |        0.4939 |          0.5813 |          0.5333 |          1.5729 |                 0.7779 |         0.0045 |
+| CategoricalNB |        0.6523 |          0.6914 |          0.6624 |          1.1014 |                 0.7733 |         0.0149 |
+

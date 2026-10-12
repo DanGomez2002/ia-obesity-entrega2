@@ -13,6 +13,10 @@ tabulate>=0.9
 # tkinter y PyQt6 >= 6.5 exige la librería del sistema libxcb-cursor0 (sudo apt install
 # libxcb-cursor0); PyQt5 se instala con pip, sin permisos de administrador, y funciona.
 PyQt5>=5.15
-# App web interactiva y pruebas
-streamlit>=1.45  # multiselect con accept_new_options (números de árboles escritos a mano)
+# Pruebas
 pytest>=8
+# Redes neuronales de la etapa 08 (Entrega 2). Versiones FIJAS para que los resultados
+# se reproduzcan: Keras 3 con backend TensorFlow (sólo CPU). Hay ruedas para Linux, macOS
+# y Windows con Python 3.10-3.13.
+tensorflow==2.21.0
+keras==3.15.1

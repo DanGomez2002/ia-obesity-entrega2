@@ -4,9 +4,7 @@ __pycache__/
 .venv/
 .venv*/
 venv/
-# Datos derivados (se regeneran con la etapa 01) y caché de modelos
-data/clf.csv
-data/reg.csv
+# Caché de modelos entrenados (se regenera sola)
 cache/
 .DS_Store
 Thumbs.db

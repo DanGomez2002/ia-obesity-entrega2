@@ -1,8 +1,0 @@
-### Clasificación A (todas las features)
-
-|                   |   cv_f1_macro |   test_accuracy |   test_f1_macro |
-|:------------------|--------------:|----------------:|----------------:|
-| Árbol de decisión |        0.923  |          0.9378 |          0.9362 |
-| Random Forest     |        0.9437 |          0.9569 |          0.9558 |
-| KNN               |        0.8152 |          0.8206 |          0.8075 |
-

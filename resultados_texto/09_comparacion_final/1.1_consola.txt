@@ -1,0 +1,43 @@
+
+--- Valores de referencia del encargo frente a la ejecución ---
+                                             referencia del encargo  ejecutado coincide
+tarea           modelo             métrica                                             
+clasificacion_A Árbol de decisión  accuracy                   0.938     0.9378       sí
+                                   f1_macro                   0.938     0.9362       NO
+                Random Forest      accuracy                   0.957     0.9569       sí
+                                   f1_macro                   0.956     0.9558       sí
+                KNN                accuracy                   0.821     0.8206       sí
+                                   f1_macro                   0.814     0.8075       NO
+clasificacion_B Árbol de decisión  accuracy                   0.746     0.7464       sí
+                                   f1_macro                   0.740     0.7401       sí
+                Random Forest      accuracy                   0.857     0.8565       sí
+                                   f1_macro                   0.853     0.8528       sí
+                KNN                accuracy                   0.768     0.7679       sí
+                                   f1_macro                   0.764     0.7567       NO
+regresion       Baseline (media)   MAE                       21.710    21.7064       sí
+                                   RMSE                      25.910    25.9126       sí
+                                   R2                         0.000    -0.0001       sí
+                                   R2_adj                    -0.048    -0.0479       sí
+                Árbol de regresión MAE                        6.580     6.5810       sí
+                                   RMSE                      10.470    10.4655       sí
+                                   R2                         0.837     0.8369       sí
+                                   R2_adj                     0.829     0.8291       sí
+                Random Forest      MAE                        4.840     4.8386       sí
+                                   RMSE                       8.250     8.2468       sí
+                                   R2                         0.899     0.8987       sí
+                                   R2_adj                     0.894     0.8939       sí
+                KNN                MAE                        5.050     5.0484       sí
+                                   RMSE                       9.910     9.9085       sí
+                                   R2                         0.854     0.8538       sí
+                                   R2_adj                     0.847     0.8468       sí
+
+25 de 28 valores coinciden (al número de decimales de la referencia).
+   DISCREPANCIA clasificacion_A · Árbol de decisión · f1_macro: encargo 0.938, ejecutado 0.9362
+   DISCREPANCIA clasificacion_A · KNN · f1_macro: encargo 0.814, ejecutado 0.8075
+   DISCREPANCIA clasificacion_B · KNN · f1_macro: encargo 0.764, ejecutado 0.7567
+
+Las cifras correctas son las ejecutadas (salidas de la Entrega 1, reproducidas en T1 al volver a
+correr sus modelos antes de congelarlas). Las discrepancias son de transcripción en el encargo, no
+de los modelos: el macro-F1 del árbol A coincide con su ACCURACY (0.938), y el del KNN B con su
+macro-F1 de VALIDACIÓN CRUZADA (0.764), no con el de test.
+

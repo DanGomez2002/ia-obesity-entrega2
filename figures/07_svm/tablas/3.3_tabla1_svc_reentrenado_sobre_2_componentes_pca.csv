@@ -1,0 +1,4 @@
+,params (de la grilla de A),accuracy test en 2D,n_vectores_soporte en 2D
+linear,{'C': 1000},0.4043,"1,547"
+poly,"{'C': 100, 'coef0': 1, …",0.4450,"1,475"
+rbf,"{'C': 100000, 'gamma': …",0.4211,"1,496"

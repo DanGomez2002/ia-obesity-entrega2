@@ -3,13 +3,13 @@
 Cómo usarlo:
   1. Abre este archivo en VS Code y pulsa el botón ▶ "Run Python File" (arriba a la derecha),
      o en una terminal:  python main.py
-  2. Elige la etapa (1-5) y luego el paso (ej. 3.4). Las gráficas se abren en una ventana
+  2. Elige la etapa (6-9) y luego el paso (ej. 3.2). Las gráficas se abren en una ventana
      (ciérrala para continuar) y las tablas salen en la consola. No se escriben archivos;
      para guardar PNG en figures/ activa [g] en el menú o usa run_all.py.
 
 Atajos directos sin menú:
-  python main.py 02 3.4          -> etapa 02, paso 3.4
-  python main.py 04 2.1 2.2 2.3  -> varios pasos seguidos
+  python main.py 07 3.2          -> etapa 07, paso 3.2
+  python main.py 06 1 1.1 2      -> varios pasos seguidos
   python main.py todo            -> igual que run_all.py (todo, sin ventanas)
 """
 import sys
@@ -23,11 +23,12 @@ ETAPAS = {}
 
 
 def _cargar_etapas():
-    """Importa las 5 etapas (import perezoso: así el menú arranca rápido)."""
+    """Importa las 4 etapas de la Entrega 2 (import perezoso: así el menú arranca rápido).
+
+    La numeración (06-09) continúa la de la Entrega 1, que vive en su propio proyecto."""
     if not ETAPAS:
-        from etapas import (e01_eda, e02_clasificacion, e03_regresion, e04_clustering,
-                            e05_comparacion)
-        for mod in (e01_eda, e02_clasificacion, e03_regresion, e04_clustering, e05_comparacion):
+        from etapas import e06_naive_bayes, e07_svm, e08_redes_neuronales, e09_comparacion_final
+        for mod in (e06_naive_bayes, e07_svm, e08_redes_neuronales, e09_comparacion_final):
             ETAPAS[mod.etapa.numero] = mod.etapa
     return ETAPAS
 
@@ -63,14 +64,14 @@ def menu_principal():
             salida.OPCIONES["graficar_tablas"] = not salida.OPCIONES["graficar_tablas"]
         elif eleccion == "c":
             cache.limpiar()
-        elif eleccion in ("1", "2", "3", "4", "5"):
+        elif "0" + eleccion in etapas:
             etapas["0" + eleccion].menu()
         else:
             print("Opción no válida.")
 
 
 def ejecutar_todo():
-    """Corre las 5 etapas completas sin abrir ventanas (sólo guarda PNG)."""
+    """Corre las 4 etapas completas sin abrir ventanas (sólo guarda PNG)."""
     mostrar_antes, guardar_antes = salida.OPCIONES["mostrar"], salida.OPCIONES["guardar"]
     salida.configurar(mostrar=False, guardar=True)
     for et in _cargar_etapas().values():

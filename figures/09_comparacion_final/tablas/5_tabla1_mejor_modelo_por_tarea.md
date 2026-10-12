@@ -1,0 +1,8 @@
+### Mejor modelo por tarea
+
+|                                        | mejor en test   | métrica         | segundo                | mejor por CV (sin la red)   |
+|:---------------------------------------|:----------------|:----------------|:-----------------------|:----------------------------|
+| Clasificación A (todas las features)   | SVM (SVC rbf)   | macro-F1 0.9678 | Random Forest (0.9558) | SVM (SVC rbf)               |
+| Clasificación B (sin Weight ni Height) | Random Forest   | macro-F1 0.8528 | SVM (SVC rbf) (0.7830) | Random Forest               |
+| Regresión de Weight                    | Random Forest   | RMSE 8.25 kg    | KNN (9.91 kg)          | Random Forest               |
+

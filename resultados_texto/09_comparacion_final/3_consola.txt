@@ -1,0 +1,13 @@
+
+--- Puesto de cada familia en cada tarea (1 = mejor) ---
+               Clasificación A (todas las features)  Clasificación B (sin Weight ni Height)  Regresión de Weight  puesto medio
+familia                                                                                                                       
+Random Forest                                     2                                       1                  1.0          1.33
+SVM                                               1                                       2                  3.0          2.00
+KNN                                               5                                       3                  2.0          3.33
+Árbol                                             3                                       4                  4.0          3.67
+Red neuronal                                      4                                       5                  5.0          4.67
+Naive Bayes                                       6                                       6                  NaN          6.00
+
+   [figura guardada] figures/09_comparacion_final/tablas/3_tabla1_puesto_de_cada_familia_en_cada_tarea_1_m.png
+   [figura guardada] figures/09_comparacion_final/3_comparacion_final.png

@@ -1,0 +1,7 @@
+categoria,valor
+Naive Bayes (CategoricalNB),0.6624
+"Red neuronal [128, 64, 32]",0.7327010891558564
+Árbol de decisión,0.7401
+KNN,0.7567
+SVM (SVC rbf),0.783
+Random Forest,0.8528

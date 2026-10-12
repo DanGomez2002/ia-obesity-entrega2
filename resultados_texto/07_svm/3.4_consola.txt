@@ -1,0 +1,33 @@
+
+--- Vectores de soporte — SVC rbf (variante A, elegido por CV) ---
+                     vectores de soporte  filas en train  % de la clase
+Insufficient_Weight                 39.0           214.0           18.2
+Normal_Weight                       62.0           225.0           27.6
+Overweight_Level_I                  77.0           221.0           34.8
+Overweight_Level_II                 61.0           232.0           26.3
+Obesity_Type_I                      43.0           281.0           15.3
+Obesity_Type_II                     22.0           237.0            9.3
+Obesity_Type_III                     8.0           259.0            3.1
+TOTAL                              312.0          1669.0           18.7
+
+   [figura guardada] figures/07_svm/tablas/3.4_tabla1_vectores_de_soporte_svc_rbf_variante_a_e.png
+
+--- Vectores de soporte — SVC rbf (variante B, elegido por CV) ---
+                     vectores de soporte  filas en train  % de la clase
+Insufficient_Weight                131.0           214.0           61.2
+Normal_Weight                      211.0           225.0           93.8
+Overweight_Level_I                 173.0           221.0           78.3
+Overweight_Level_II                176.0           232.0           75.9
+Obesity_Type_I                     176.0           281.0           62.6
+Obesity_Type_II                    101.0           237.0           42.6
+Obesity_Type_III                    30.0           259.0           11.6
+TOTAL                              998.0          1669.0           59.8
+
+   [figura guardada] figures/07_svm/tablas/3.4_tabla2_vectores_de_soporte_svc_rbf_variante_b_e.png
+SVR rbf (regresión, elegido por CV): 1250 vectores de soporte de 1669 filas de train (74.9 %) — los puntos fuera del tubo de ancho epsilon
+
+Pocos vectores de soporte = frontera definida por pocos puntos (modelo "simple" y rápido de
+predecir). Una fracción alta indica clases solapadas o un margen muy ancho (C pequeño): la mayoría
+de los puntos tocan o violan el margen. En SVR, cuanto más estrecho es el tubo (epsilon pequeño),
+más puntos quedan fuera y más vectores de soporte hay.
+

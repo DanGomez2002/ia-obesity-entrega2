@@ -47,11 +47,6 @@ _PASOS_INICIADOS = set()
 OPCIONES = {"mostrar": True, "guardar": True, "graficar_tablas": True}
 _backend_listo = False
 
-# Receptor opcional de la salida (p. ej. una interfaz gráfica). Si es None todo va a
-# la consola como siempre; si no, títulos, notas, tablas y figuras se le entregan a él con
-# sus métodos titulo(texto), subtitulo(texto), nota(texto), tabla(df, titulo) y figura(fig, nombre).
-RECEPTOR = None
-
 # Etapa/paso en curso: lo fija src/pasos.py para poder nombrar las figuras de las tablas
 _CONTEXTO = {"carpeta": "tablas_sueltas", "paso": "suelta", "n_tabla": 0}
 
@@ -144,9 +139,7 @@ def mostrar(fig, nombre: str, etapa: str, ventana: bool | None = None, datos=Non
         print(f"   [figura guardada] {ruta.relative_to(FIG_DIR.parent)}")
         if not es_tabla:
             _guardar_figura_texto(fig, nombre, etapa, datos=datos)
-    if RECEPTOR is not None and ventana is not False:
-        RECEPTOR.figura(fig, nombre)
-    elif abrir:
+    if abrir:
         print("   [ventana abierta] cierra la ventana de la gráfica para continuar...")
         # Variable de entorno para pruebas automáticas: cierra la ventana sola tras N ms
         auto_ms = os.environ.get("IA2_AUTOCERRAR_MS")
@@ -162,23 +155,21 @@ def mostrar(fig, nombre: str, etapa: str, ventana: bool | None = None, datos=Non
 # ---------- Texto ----------
 
 def titulo(texto: str):
-    if RECEPTOR is not None:
-        return RECEPTOR.titulo(texto)
     print("\n" + "=" * 100)
     print(texto)
     print("=" * 100)
 
 
 def subtitulo(texto: str):
-    if RECEPTOR is not None:
-        return RECEPTOR.subtitulo(texto)
     print("\n--- " + texto + " ---")
 
 
 def nota(texto: str):
-    """Imprime una explicación (equivalente a las celdas markdown del notebook)."""
-    if RECEPTOR is not None:
-        return RECEPTOR.nota(textwrap.dedent(texto).strip())
+    """Imprime una explicación (equivalente a las celdas markdown del notebook). Con --guardar
+    o run_all.py se añade también, tal cual, al .md del paso (resultados_texto/), para que el
+    estudio en HTML la muestre con sus cifras ya calculadas."""
+    if OPCIONES["guardar"]:
+        _anexar_al_md_del_paso("<!-- nota -->\n" + textwrap.dedent(texto).strip() + "\n\n")
     print()
     for parrafo in textwrap.dedent(texto).strip().split("\n\n"):
         lineas = parrafo.splitlines()
@@ -201,9 +192,7 @@ def tabla(df, titulo_tabla: str | None = None, decimales: int = 4, grafica: bool
     if isinstance(df, pd.Series):
         df = df.to_frame()
     d = df.round(decimales)
-    if RECEPTOR is not None and texto:
-        RECEPTOR.tabla(d, titulo_tabla)
-    elif texto:
+    if texto:
         if titulo_tabla:
             subtitulo(titulo_tabla)
         with pd.option_context("display.max_rows", 200, "display.max_columns", 40,
@@ -299,6 +288,20 @@ def _formatear_df(df: pd.DataFrame, decimales: int) -> pd.DataFrame:
     return df_f
 
 
+def _anexar_al_md_del_paso(md_contenido: str):
+    """Añade un bloque al archivo del paso en curso, resultados_texto/<etapa>/<paso>.md (lo
+    crea, con su cabecera, la primera vez que el paso escribe algo en esta ejecución)."""
+    etapa, paso = _CONTEXTO["carpeta"], str(_CONTEXTO["paso"])
+    dir_etapa_res = RESULTADOS_TEXTO_DIR / etapa
+    dir_etapa_res.mkdir(parents=True, exist_ok=True)
+    modo = "a" if (etapa, paso) in _PASOS_INICIADOS else "w"
+    _PASOS_INICIADOS.add((etapa, paso))
+    with open(dir_etapa_res / f"{paso}.md", modo, encoding="utf-8") as f:
+        if modo == "w":
+            f.write(f"# Etapa {etapa} · Paso {paso}\n\n")
+        f.write(md_contenido)
+
+
 def _guardar_tabla_texto(df: pd.DataFrame, titulo_tabla: str | None, decimales: int, nombre: str):
     """Guarda la tabla en Markdown y CSV en resultados_texto/ y figures/."""
     etapa = _CONTEXTO["carpeta"]
@@ -309,16 +312,8 @@ def _guardar_tabla_texto(df: pd.DataFrame, titulo_tabla: str | None, decimales: 
     md_contenido = md_titulo + df_formateado.to_markdown() + "\n\n"
 
     # 1. Archivo del paso: resultados_texto/<etapa>/<paso>.md
+    _anexar_al_md_del_paso(md_contenido)
     dir_etapa_res = RESULTADOS_TEXTO_DIR / etapa
-    dir_etapa_res.mkdir(parents=True, exist_ok=True)
-    ruta_paso_md = dir_etapa_res / f"{paso}.md"
-
-    modo = "a" if (etapa, paso) in _PASOS_INICIADOS else "w"
-    _PASOS_INICIADOS.add((etapa, paso))
-    with open(ruta_paso_md, modo, encoding="utf-8") as f:
-        if modo == "w":
-            f.write(f"# Etapa {etapa} · Paso {paso}\n\n")
-        f.write(md_contenido)
 
     # 2. Archivos individuales en resultados_texto/<etapa>/tablas/
     dir_tablas_res = dir_etapa_res / "tablas"

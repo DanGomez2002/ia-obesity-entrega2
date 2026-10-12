@@ -1,0 +1,59 @@
+   [calculando] svm_clf_A ... (la primera vez tarda; luego queda en cache/)
+   [A] linear: mejores params = {'C': 1000}
+   [A] poly: mejores params = {'C': 100, 'coef0': 1, 'degree': 3, 'gamma': 0.01}
+   [A] rbf: mejores params = {'C': 100000, 'gamma': 0.0001}
+   [calculando] svm_clf_B ... (la primera vez tarda; luego queda en cache/)
+   [B] linear: mejores params = {'C': 100}
+   [B] poly: mejores params = {'C': 1, 'coef0': 1, 'degree': 5, 'gamma': 'scale'}
+   [B] rbf: mejores params = {'C': 10, 'gamma': 0.1}
+   [calculando] svm_reg ... (la primera vez tarda; luego queda en cache/)
+   [reg] linear: mejores params = {'C': 10, 'epsilon': 0.5}
+   [reg] poly: mejores params = {'C': 1, 'degree': 3, 'epsilon': 0.3, 'gamma': 'scale'}
+   [reg] rbf: mejores params = {'C': 1, 'epsilon': 0.05, 'gamma': 0.1}
+
+--- Clasificación A, SVC rbf: macro-F1 de CV por C (filas) y gamma (columnas) ---
+param_svc__gamma  0.0001   0.001    0.01     0.1       1   1e-05   scale
+param_svc__C                                                            
+0.1               0.0412  0.0412  0.4798  0.6495  0.2339  0.0412  0.6348
+1.0               0.0412  0.4936  0.7497  0.8690  0.7979  0.0412  0.8522
+10.0              0.4927  0.7218  0.9032  0.8967  0.8084  0.0412  0.9059
+100.0             0.7163  0.9131  0.9481  0.8991  0.8084  0.4943  0.9108
+1000.0            0.8984  0.9613  0.9516  0.8991  0.8084  0.7156  0.9108
+10000.0           0.9555  0.9562  0.9516  0.8991  0.8084  0.8982  0.9108
+100000.0          0.9650  0.9550  0.9516  0.8991  0.8084  0.9479  0.9108
+1000000.0         0.9581  0.9550  0.9516  0.8991  0.8084  0.9583  0.9108
+
+
+--- Regresión, SVR linear con C=10: RMSE de CV según epsilon (grilla) ---
+                               RMSE de CV
+param_regressor__svr__epsilon            
+0.01                              18.1414
+0.05                              18.1493
+0.10                              18.1513
+0.20                              18.0421
+0.30                              18.0066
+0.50                              17.9842
+1.00                              18.2999
+
+   [calculando] svm_bordes ... (la primera vez tarda; luego queda en cache/)
+
+--- Óptimo de la grilla frente a valores fuera de ella (CV de 5 folds) ---
+                                                                  cv (macro-F1; reg: RMSE)
+tarea kernel params probados                                                              
+A     linear óptimo de la grilla {'C': 1000}                                        0.9599
+      rbf    óptimo de la grilla {'C': 100000, 'gamma': 0.0001}                     0.9650
+B     poly   óptimo de la grilla (degree=5)                                         0.7821
+reg   linear óptimo de la grilla (epsilon=0.5)                                     17.9842
+A     linear {'C': 3000}                                                            0.9593
+             {'C': 10000}                                                           0.9547
+      rbf    {'C': 10000000.0, 'gamma': 1e-05}                                      0.9577
+B     poly   {'C': 1, 'coef0': 1, 'gamma': 'scale', 'degree': 6}                    0.7818
+             {'C': 1, 'coef0': 1, 'gamma': 'scale', 'degree': 7}                    0.7829
+reg   linear {'C': 10, 'epsilon': 0.75}                                            18.0372
+
+
+La grilla final se amplió en tres pasadas hasta que ningún óptimo quedara pegado a un borde sin
+comprobar. Dos quedan en el borde a propósito: linear en A (C=1000), porque más allá la CV baja y en
+la variante B un ajuste con C=10000 tarda más de 10 minutos; y poly en B (degree=5), donde los
+grados 6 y 7 forman una meseta (±0.001) y rbf gana de todos modos.
+

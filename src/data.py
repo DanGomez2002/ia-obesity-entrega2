@@ -9,8 +9,6 @@ from config import DATA_DIR
 
 UCI_ID = 544
 RAW_CSV = DATA_DIR / "obesity_raw.csv"
-CLF_CSV = DATA_DIR / "clf.csv"   # generado por la etapa 01 (features + NObeyesdad)
-REG_CSV = DATA_DIR / "reg.csv"   # generado por la etapa 01 (features sin NObeyesdad + Weight)
 TARGET_CLF = "NObeyesdad"
 TARGET_REG = "Weight"
 

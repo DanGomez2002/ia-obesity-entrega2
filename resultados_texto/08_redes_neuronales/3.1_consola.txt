@@ -1,0 +1,53 @@
+Arquitectura: pequeña [32] · 903 parámetros · mejor época 157 de 187 entrenadas (semilla 42)
+
+--- Red neuronal (A) en test: semilla 42 y media ± desviación de 5 semillas ---
+             semilla 42  media 5 semillas  desv. 5 semillas
+accuracy         0.9258            0.9292            0.0071
+f1_macro         0.9227            0.9261            0.0077
+log_loss         0.3097            0.2634            0.0396
+mejor_epoca    157.0000          163.0000            5.9582
+epocas         187.0000          193.0000            5.9582
+tiempo_s        30.0625           31.2711            1.0552
+
+   [figura guardada] figures/08_redes_neuronales/tablas/3.1_tabla1_red_neuronal_a_en_test_semilla_42_y_medi.png
+
+--- Red neuronal (A) en test, por semilla ---
+    accuracy  f1_macro  log_loss  mejor_epoca  epocas  tiempo_s
+42    0.9258    0.9227    0.3097          157     187   30.0625
+43    0.9402    0.9380    0.2171          171     201   32.3455
+44    0.9211    0.9171    0.2997          158     188   30.2659
+45    0.9282    0.9251    0.2437          167     197   32.1398
+46    0.9306    0.9275    0.2468          162     192   31.5417
+
+
+--- Red neuronal pequeña (A), semilla 42 ---
+                     precision    recall  f1-score   support
+
+Insufficient_Weight      0.946     1.000     0.972        53
+      Normal_Weight      0.889     0.842     0.865        57
+ Overweight_Level_I      0.776     0.818     0.796        55
+Overweight_Level_II      0.927     0.879     0.903        58
+     Obesity_Type_I      0.958     0.986     0.972        70
+    Obesity_Type_II      0.983     0.950     0.966        60
+   Obesity_Type_III      0.985     0.985     0.985        65
+
+           accuracy                          0.926       418
+          macro avg      0.923     0.923     0.923       418
+       weighted avg      0.927     0.926     0.926       418
+
+   [figura guardada] figures/08_redes_neuronales/tablas/3.1_tabla3_classification_report_por_clase_red_a.png
+   [figura guardada] figures/08_redes_neuronales/3.1_matriz_confusion_A.png
+
+--- Métricas por clase — red (A) ---
+                     TP  FN  FP   TN  Precision  Recall     F1
+Clase                                                         
+Insufficient_Weight  53   0   3  362      0.946   1.000  0.972
+Normal_Weight        48   9   6  355      0.889   0.842  0.865
+Overweight_Level_I   45  10  13  350      0.776   0.818  0.796
+Overweight_Level_II  51   7   4  356      0.927   0.879  0.903
+Obesity_Type_I       69   1   3  345      0.958   0.986  0.972
+Obesity_Type_II      57   3   1  357      0.983   0.950  0.966
+Obesity_Type_III     64   1   1  352      0.985   0.985  0.985
+
+   [figura guardada] figures/08_redes_neuronales/tablas/3.1_tabla4_metricas_por_clase_red_a.png
+Confianza media (prob. de la clase predicha) 0.944 vs accuracy 0.926 (+0.018)

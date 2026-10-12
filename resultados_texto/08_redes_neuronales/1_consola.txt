@@ -1,0 +1,15 @@
+
+--- Tamaños de cada parte (sin solapes) ---
+                                      entradas  sub-train  validación  test huella del test
+Clasificación A (todas las features)        20       1418         251   418    8d9af7b40ee9
+Clasificación B (sin Weight/Height)         18       1418         251   418    8d9af7b40ee9
+Regresión de Weight                         19       1418         251   418    021799f95367
+
+Target de regresión en el sub-train: media 86.98 kg, desviación 26.32 kg (con esto se estandariza y se des-estandariza)
+X del sub-train tras escalar: medias en [-1.5e-08, 2.4e-08]; X del test tras escalar: medias en [-0.08, 0.11] (no son 0: el escalador no vio el test)
+
+La validación que usa el early stopping y la elección de arquitectura sale del TRAIN (15 %,
+estratificada). Si saliera del test, el test decidiría cuándo parar y qué red elegir, y su métrica
+final ya no sería una estimación honesta. Por la misma razón los escaladores se ajustan sólo con el
+sub-train: las medias del test escalado no son exactamente 0.
+

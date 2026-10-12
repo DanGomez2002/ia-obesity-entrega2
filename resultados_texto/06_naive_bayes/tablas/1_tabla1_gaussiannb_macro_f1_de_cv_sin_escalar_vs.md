@@ -1,0 +1,9 @@
+### GaussianNB: macro-F1 de CV sin escalar vs con StandardScaler
+
+|                             |   cv_f1_macro |   mejor var_smoothing |
+|:----------------------------|--------------:|----------------------:|
+| ('A', 'sin escalar')        |        0.6424 |                0.0001 |
+| ('A', 'con StandardScaler') |        0.5061 |                0.01   |
+| ('B', 'sin escalar')        |        0.4939 |                0.001  |
+| ('B', 'con StandardScaler') |        0.4377 |                0.1    |
+
