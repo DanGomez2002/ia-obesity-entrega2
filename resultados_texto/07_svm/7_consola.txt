@@ -1,0 +1,9 @@
+
+--- Filas para data/resultados_entrega2.csv ---
+                               accuracy  f1_macro     RMSE      R2  cv_score  n_vectores_soporte  tiempo_entrenamiento_s
+tarea           modelo                                                                                                  
+clasificacion_A SVM (SVC rbf)    0.9689    0.9678      NaN     NaN    0.9650               312.0                  0.0974
+clasificacion_B SVM (SVC rbf)    0.7871    0.7830      NaN     NaN    0.7964               998.0                  0.0728
+regresion       SVM (SVR rbf)       NaN       NaN  10.0951  0.8482    9.4351              1250.0                  0.0998
+
+   [resultados] data/resultados_entrega2.csv: 3 filas de la etapa 07 (8 en total)

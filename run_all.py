@@ -6,7 +6,8 @@
 
 Etapas de la Entrega 2 (la numeración continúa la de la Entrega 1, que vive en su propio
 proyecto): 06 Naive Bayes, 07 SVM, 08 redes neuronales con Keras y 09 comparación final.
-Es la forma de reproducir el proyecto entero de una vez.
+Es la forma de reproducir el proyecto entero de una vez. Al terminar regenera también
+estudio_entrega2.html (generar_estudio.py) con las salidas nuevas.
 """
 import argparse
 import importlib
@@ -39,3 +40,6 @@ if __name__ == "__main__":
         print(f"\n[run_all] {nombre} terminada en {time.time() - t_etapa:.0f} s")
     print(f"\n{len(elegidas)} etapas ejecutadas en {time.time() - t0:.0f} s. Figuras en figures/, "
           "tablas en resultados_texto/.")
+    import generar_estudio
+    generar_estudio.SALIDA.write_text(generar_estudio.pagina(), encoding="utf-8")
+    print(f"Estudio en HTML regenerado: {generar_estudio.SALIDA.name}")

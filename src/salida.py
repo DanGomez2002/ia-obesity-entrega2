@@ -165,7 +165,11 @@ def subtitulo(texto: str):
 
 
 def nota(texto: str):
-    """Imprime una explicación (equivalente a las celdas markdown del notebook)."""
+    """Imprime una explicación (equivalente a las celdas markdown del notebook). Con --guardar
+    o run_all.py se añade también, tal cual, al .md del paso (resultados_texto/), para que el
+    estudio en HTML la muestre con sus cifras ya calculadas."""
+    if OPCIONES["guardar"]:
+        _anexar_al_md_del_paso("<!-- nota -->\n" + textwrap.dedent(texto).strip() + "\n\n")
     print()
     for parrafo in textwrap.dedent(texto).strip().split("\n\n"):
         lineas = parrafo.splitlines()
@@ -284,6 +288,20 @@ def _formatear_df(df: pd.DataFrame, decimales: int) -> pd.DataFrame:
     return df_f
 
 
+def _anexar_al_md_del_paso(md_contenido: str):
+    """Añade un bloque al archivo del paso en curso, resultados_texto/<etapa>/<paso>.md (lo
+    crea, con su cabecera, la primera vez que el paso escribe algo en esta ejecución)."""
+    etapa, paso = _CONTEXTO["carpeta"], str(_CONTEXTO["paso"])
+    dir_etapa_res = RESULTADOS_TEXTO_DIR / etapa
+    dir_etapa_res.mkdir(parents=True, exist_ok=True)
+    modo = "a" if (etapa, paso) in _PASOS_INICIADOS else "w"
+    _PASOS_INICIADOS.add((etapa, paso))
+    with open(dir_etapa_res / f"{paso}.md", modo, encoding="utf-8") as f:
+        if modo == "w":
+            f.write(f"# Etapa {etapa} · Paso {paso}\n\n")
+        f.write(md_contenido)
+
+
 def _guardar_tabla_texto(df: pd.DataFrame, titulo_tabla: str | None, decimales: int, nombre: str):
     """Guarda la tabla en Markdown y CSV en resultados_texto/ y figures/."""
     etapa = _CONTEXTO["carpeta"]
@@ -294,16 +312,8 @@ def _guardar_tabla_texto(df: pd.DataFrame, titulo_tabla: str | None, decimales: 
     md_contenido = md_titulo + df_formateado.to_markdown() + "\n\n"
 
     # 1. Archivo del paso: resultados_texto/<etapa>/<paso>.md
+    _anexar_al_md_del_paso(md_contenido)
     dir_etapa_res = RESULTADOS_TEXTO_DIR / etapa
-    dir_etapa_res.mkdir(parents=True, exist_ok=True)
-    ruta_paso_md = dir_etapa_res / f"{paso}.md"
-
-    modo = "a" if (etapa, paso) in _PASOS_INICIADOS else "w"
-    _PASOS_INICIADOS.add((etapa, paso))
-    with open(ruta_paso_md, modo, encoding="utf-8") as f:
-        if modo == "w":
-            f.write(f"# Etapa {etapa} · Paso {paso}\n\n")
-        f.write(md_contenido)
 
     # 2. Archivos individuales en resultados_texto/<etapa>/tablas/
     dir_tablas_res = dir_etapa_res / "tablas"

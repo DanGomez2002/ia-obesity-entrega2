@@ -1,0 +1,61 @@
+
+--- GaussianNB (A) ---
+                     precision    recall  f1-score   support
+
+Insufficient_Weight      0.781     0.943     0.855        53
+      Normal_Weight      0.811     0.526     0.638        57
+ Overweight_Level_I      0.615     0.436     0.511        55
+Overweight_Level_II      0.295     0.224     0.255        58
+     Obesity_Type_I      0.441     0.586     0.503        70
+    Obesity_Type_II      0.770     0.950     0.851        60
+   Obesity_Type_III      0.970     1.000     0.985        65
+
+           accuracy                          0.670       418
+          macro avg      0.669     0.667     0.657       418
+       weighted avg      0.667     0.670     0.657       418
+
+   [figura guardada] figures/06_naive_bayes/tablas/3.1_tabla1_classification_report_por_clase_gaussian.png
+
+--- CategoricalNB (A) ---
+                     precision    recall  f1-score   support
+
+Insufficient_Weight      0.978     0.830     0.898        53
+      Normal_Weight      0.667     0.982     0.794        57
+ Overweight_Level_I      0.755     0.673     0.712        55
+Overweight_Level_II      0.659     0.500     0.569        58
+     Obesity_Type_I      0.761     0.729     0.745        70
+    Obesity_Type_II      0.877     0.950     0.912        60
+   Obesity_Type_III      1.000     0.985     0.992        65
+
+           accuracy                          0.809       418
+          macro avg      0.814     0.807     0.803       418
+       weighted avg      0.815     0.809     0.805       418
+
+   [figura guardada] figures/06_naive_bayes/tablas/3.1_tabla2_classification_report_por_clase_categori.png
+   [figura guardada] figures/06_naive_bayes/3.1_matrices_confusion_A.png
+
+--- Métricas por clase — GaussianNB (A) ---
+                     TP  FN  FP   TN  Precision  Recall     F1
+Clase                                                         
+Insufficient_Weight  50   3  14  351      0.781   0.943  0.855
+Normal_Weight        30  27   7  354      0.811   0.526  0.638
+Overweight_Level_I   24  31  15  348      0.615   0.436  0.511
+Overweight_Level_II  13  45  31  329      0.295   0.224  0.255
+Obesity_Type_I       41  29  52  296      0.441   0.586  0.503
+Obesity_Type_II      57   3  17  341      0.770   0.950  0.851
+Obesity_Type_III     65   0   2  351      0.970   1.000  0.985
+
+   [figura guardada] figures/06_naive_bayes/tablas/3.1_tabla3_metricas_por_clase_gaussiannb_a.png
+
+--- Métricas por clase — CategoricalNB (A) ---
+                     TP  FN  FP   TN  Precision  Recall     F1
+Clase                                                         
+Insufficient_Weight  44   9   1  364      0.978   0.830  0.898
+Normal_Weight        56   1  28  333      0.667   0.982  0.794
+Overweight_Level_I   37  18  12  351      0.755   0.673  0.712
+Overweight_Level_II  29  29  15  345      0.659   0.500  0.569
+Obesity_Type_I       51  19  16  332      0.761   0.729  0.745
+Obesity_Type_II      57   3   8  350      0.877   0.950  0.912
+Obesity_Type_III     64   1   0  353      1.000   0.985  0.992
+
+   [figura guardada] figures/06_naive_bayes/tablas/3.1_tabla4_metricas_por_clase_categoricalnb_a.png

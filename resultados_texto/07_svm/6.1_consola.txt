@@ -1,0 +1,19 @@
+   [figura guardada] figures/07_svm/6.1_pred_vs_real_svr.png
+   [figura guardada] figures/07_svm/6.1_residuos_vs_predicho_svr.png
+
+--- Extrapolación: predicciones fuera del rango del train [39.4, 173.0] kg ---
+            pred. mínima (kg)  pred. máxima (kg)  fuera de [mín, máx] del train  residuo máx. |kg|
+SVR linear              24.72             120.12                             12              47.14
+SVR poly               -39.95             254.26                             18             142.26
+SVR rbf                 38.02             150.57                              1              49.45
+
+   [figura guardada] figures/07_svm/tablas/6.1_tabla1_extrapolacion_predicciones_fuera_del_ran.png
+
+El kernel poly tiene mejor RMSE de CV que el lineal (15.97 frente a
+17.98 kg) pero peor en test (18.38 frente a
+17.34 kg). La tabla muestra por qué: un polinomio crece sin límite
+fuera de la zona donde hay datos de entrenamiento, y unas pocas filas del test producen
+predicciones absurdas (un peso negativo o muy por encima del máximo observado). El RMSE eleva
+al cuadrado esos errores, así que unas pocas predicciones disparatadas bastan para empeorarlo.
+El rbf no tiene ese problema: lejos de los datos su predicción tiende a la media.
+

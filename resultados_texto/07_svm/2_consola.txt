@@ -1,0 +1,34 @@
+
+--- SVC — kernel linear ---
+   C: [0.01, 0.1, 1, 10, 100, 1000]
+   (6 combinaciones × 5 folds = 30 ajustes)
+
+--- SVC — kernel poly ---
+   C: [0.1, 1, 10, 100, 1000]
+   degree: [2, 3, 4, 5]
+   gamma: ['scale', 0.01, 0.1, 0.5]
+   coef0: [0, 1]
+   (160 combinaciones × 5 folds = 800 ajustes)
+
+--- SVC — kernel rbf ---
+   C: [0.1, 1, 10, 100, 1000, 10000, 100000, 1000000]
+   gamma: ['scale', 1e-05, 0.0001, 0.001, 0.01, 0.1, 1]
+   (56 combinaciones × 5 folds = 280 ajustes)
+
+--- SVR — kernel linear ---
+   C: [0.1, 1, 10, 100]
+   epsilon: [0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0]
+   (28 combinaciones × 5 folds = 140 ajustes)
+
+--- SVR — kernel poly ---
+   C: [0.01, 0.1, 1, 10]
+   epsilon: [0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0]
+   degree: [2, 3]
+   gamma: ['scale', 0.01, 0.1]
+   (168 combinaciones × 5 folds = 840 ajustes)
+
+--- SVR — kernel rbf ---
+   C: [0.1, 1, 10, 100, 1000]
+   epsilon: [0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0]
+   gamma: ['scale', 0.001, 0.01, 0.1, 1]
+   (175 combinaciones × 5 folds = 875 ajustes)

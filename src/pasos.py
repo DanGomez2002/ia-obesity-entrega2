@@ -11,6 +11,7 @@ de línea de comandos y `menu()` para el menú interactivo.
 """
 import argparse
 import ast
+import contextlib
 import importlib.util
 import inspect
 import sys
@@ -82,6 +83,22 @@ def _linea_ubicaciones(nombres, espacio, titulo="") -> str:
     if not trozos:
         return ""
     return (f"{titulo}: " if titulo else "") + " · ".join(trozos)
+
+
+class _Tee:
+    """Escribe en varios flujos a la vez (consola + archivo)."""
+
+    def __init__(self, *flujos):
+        self.flujos = flujos
+
+    def write(self, texto):
+        for f in self.flujos:
+            f.write(texto)
+        return len(texto)
+
+    def flush(self):
+        for f in self.flujos:
+            f.flush()
 
 
 @dataclass
@@ -175,7 +192,16 @@ class Etapa:
                       + (f"\n{p.ubicacion}" if p.ubicacion else "")
                       + (f"\n{p.linea_parametros}" if p.linea_parametros else ""))
         t0 = time.time()
-        p.fn()
+        if salida.OPCIONES["guardar"]:
+            # Con --guardar / run_all.py la salida de consola del paso también queda en
+            # resultados_texto/<etapa>/<paso>_consola.txt (lo que mostraría la celda del notebook)
+            carpeta = salida.RESULTADOS_TEXTO_DIR / self.carpeta_figuras
+            carpeta.mkdir(parents=True, exist_ok=True)
+            with open(carpeta / f"{p.id}_consola.txt", "w", encoding="utf-8") as f, \
+                    contextlib.redirect_stdout(_Tee(sys.stdout, f)):
+                p.fn()
+        else:
+            p.fn()
         print(f"\n   (paso {p.id} terminado en {time.time() - t0:.1f} s)")
 
     def ejecutar_todo(self):

@@ -1,0 +1,28 @@
+   [calculando] nn_clasificacion_B ... (la primera vez tarda; luego queda en cache/)
+   [clasificacion_B] pequeña [32] semilla 42: val_loss 0.9243 (mejor época 54 de 84, 14.0 s)
+   [clasificacion_B] pequeña [32] semilla 43: val_loss 0.9482 (mejor época 55 de 85, 14.5 s)
+   [clasificacion_B] pequeña [32] semilla 44: val_loss 0.9338 (mejor época 67 de 97, 16.0 s)
+   [clasificacion_B] pequeña [32] semilla 45: val_loss 0.9317 (mejor época 55 de 85, 14.9 s)
+   [clasificacion_B] pequeña [32] semilla 46: val_loss 0.9596 (mejor época 83 de 113, 19.2 s)
+   [clasificacion_B] media [64, 32] semilla 42: val_loss 0.8601 (mejor época 29 de 59, 10.5 s)
+   [clasificacion_B] media [64, 32] semilla 43: val_loss 0.8784 (mejor época 23 de 53, 9.2 s)
+   [clasificacion_B] media [64, 32] semilla 44: val_loss 0.9023 (mejor época 19 de 49, 8.7 s)
+   [clasificacion_B] media [64, 32] semilla 45: val_loss 0.8373 (mejor época 28 de 58, 10.4 s)
+   [clasificacion_B] media [64, 32] semilla 46: val_loss 0.8701 (mejor época 27 de 57, 10.1 s)
+   [clasificacion_B] grande [128, 64, 32] semilla 42: val_loss 0.8455 (mejor época 9 de 39, 7.5 s)
+   [clasificacion_B] grande [128, 64, 32] semilla 43: val_loss 0.8435 (mejor época 12 de 42, 8.5 s)
+   [clasificacion_B] grande [128, 64, 32] semilla 44: val_loss 0.8514 (mejor época 17 de 47, 8.8 s)
+   [clasificacion_B] grande [128, 64, 32] semilla 45: val_loss 0.8302 (mejor época 11 de 41, 7.8 s)
+   [clasificacion_B] grande [128, 64, 32] semilla 46: val_loss 0.8760 (mejor época 12 de 42, 8.2 s)
+
+--- Clasificación B (sin Weight/Height) — arquitecturas (validación, 5 semillas) ---
+                      n_parametros  val_loss media  val_loss desv  val_loss semilla 42  mejor época (media)  épocas entrenadas (media)  tiempo medio (s)
+pequeña [32]                   839          0.9395         0.0142               0.9243                 62.8                       92.8           15.7285
+media [64, 32]                3527          0.8697         0.0239               0.8601                 25.2                       55.2            9.7927
+grande [128, 64, 32]         12999          0.8493         0.0168               0.8455                 12.2                       42.2            8.1646
+
+   [figura guardada] figures/08_redes_neuronales/tablas/4_tabla1_clasificacion_b_sin_weight_height_arquit.png
+   [figura guardada] figures/08_redes_neuronales/4_curvas_perdida_B.png
+Arquitectura elegida (menor val_loss media): grande [128, 64, 32]
+   pequeña [32]: val_loss media +0.0902 respecto a la elegida (5.4 desviaciones de la elegida)
+   media [64, 32]: val_loss media +0.0203 respecto a la elegida (1.2 desviaciones de la elegida)

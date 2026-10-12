@@ -1,0 +1,9 @@
+
+--- Variante B — SVC por kernel: CV, test, nº de vectores de soporte y tiempo ---
+        cv_f1_macro  test_accuracy  test_f1_macro  n_vectores_soporte  tiempo_fit_s                                       mejores_params
+linear       0.6235         0.6411         0.6091              1182.0        4.1660                                           {'C': 100}
+poly         0.7821         0.7799         0.7705               934.0        0.0711  {'C': 1, 'coef0': 1, 'degree': 5, 'gamma': 'scale'}
+rbf          0.7964         0.7871         0.7830               998.0        0.0728                              {'C': 10, 'gamma': 0.1}
+
+   [figura guardada] figures/07_svm/tablas/4_tabla1_variante_b_svc_por_kernel_cv_test_no_de.png
+Kernel elegido por macro-F1 de CV: rbf

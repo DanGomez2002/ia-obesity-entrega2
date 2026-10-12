@@ -1,0 +1,50 @@
+
+--- Las 3 arquitecturas en cada tarea ---
+                                                           entradas  capas ocultas neuronas ocultas     salida                          pérdida  parámetros
+Clasificación A (todas las features) pequeña [32]                20              1               32  7 softmax  sparse_categorical_crossentropy         903
+                                     media [64, 32]              20              2          64 → 32  7 softmax  sparse_categorical_crossentropy        3655
+                                     grande [128, 64, 32]        20              3    128 → 64 → 32  7 softmax  sparse_categorical_crossentropy       13255
+Clasificación B (sin Weight/Height)  pequeña [32]                18              1               32  7 softmax  sparse_categorical_crossentropy         839
+                                     media [64, 32]              18              2          64 → 32  7 softmax  sparse_categorical_crossentropy        3527
+                                     grande [128, 64, 32]        18              3    128 → 64 → 32  7 softmax  sparse_categorical_crossentropy       12999
+Regresión de Weight                  pequeña [32]                19              1               32   1 lineal                              mse         673
+                                     media [64, 32]              19              2          64 → 32   1 lineal                              mse        3393
+                                     grande [128, 64, 32]        19              3    128 → 64 → 32   1 lineal                              mse       12929
+
+
+--- Desglose de parámetros (clasificación A, arquitectura media) ---
+Model: "sequential_9"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ dense_27 (Dense)                │ (None, 64)             │         1,344 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_28 (Dense)                │ (None, 32)             │         2,080 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense_29 (Dense)                │ (None, 7)              │           231 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 3,655 (14.28 KB)
+ Trainable params: 3,655 (14.28 KB)
+ Non-trainable params: 0 (0.00 B)
+
+Optimizador Adam (lr=0.001), lotes de 32, hasta 500 épocas, EarlyStopping(val_loss, patience=30, restore_best_weights=True)
+
+Reproducibilidad (red pequeña, 5 épocas): semilla 42 dos veces -> val_loss 1.235814 y 1.235814, pesos idénticos: True; semilla 43 -> 1.274095
+
+Entradas: una neurona por atributo codificado (las mismas columnas que usan los demás modelos; las
+binarias y one-hot ya son numéricas y las ordinales van de 0 a 3), escaladas con StandardScaler
+porque el descenso de gradiente converge mal si los atributos tienen escalas muy distintas (Weight
+en kg frente a binarias 0/1).
+
+Salidas: en clasificación, 7 neuronas softmax porque hay 7 clases excluyentes: la salida se
+interpreta como P(clase | x) y se entrena con la entropía cruzada (sparse_ porque las etiquetas van
+como enteros 0-6, no one-hot). En regresión, 1 neurona lineal porque se predice un único número real
+sin acotar; se entrena con el error cuadrático medio.
+
+Capas ocultas: con ~1400 filas de entrenamiento y ~20 atributos, el problema es pequeño. Se prueban
+1, 2 y 3 capas con anchura decreciente (32; 64-32; 128-64-32): la primera capa algo más ancha que la
+entrada para poder combinar atributos, y las siguientes más estrechas para resumir. ReLU evita la
+saturación de sigmoide/tanh. No se usa dropout ni regularización L2: el freno al sobreajuste es el
+early stopping, y las curvas por época muestran si hace falta más. La arquitectura se elige por la
+pérdida media de validación en 5 semillas.
+

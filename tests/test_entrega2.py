@@ -123,3 +123,21 @@ def test_validacion_de_la_red_sale_del_train(tarea):
     assert len(d["columnas"]) == {"clasificacion_A": 20, "clasificacion_B": 18, "regresion": 19}[tarea]
     if tarea == "regresion":
         assert "NObeyesdad" not in d["columnas"] and "Weight" not in d["columnas"]
+
+
+# ----------------------------------------------------------------------------
+# Estudio en HTML
+# ----------------------------------------------------------------------------
+def test_el_estudio_html_tiene_todos_los_pasos_y_ningun_resultado_escrito_a_mano():
+    import re
+    import generar_estudio as g
+    import main
+    etapas = list(main._cargar_etapas().values())
+    if not all((g.RES / et.carpeta_figuras / f"{p.id}_consola.txt").exists() for et in etapas for p in et.pasos):
+        pytest.skip("faltan las salidas (se crean con run_all.py)")
+    html = g.pagina()
+    assert html.count('<article class="step"') == sum(len(et.pasos) for et in etapas)
+    assert set(g.IDEA) == {(et.numero, p.id) for et in etapas for p in et.pasos}
+    # el texto escrito a mano no lleva cifras con decimales (los resultados salen de las salidas)
+    manual = " ".join(list(g.IDEA.values()) + list(g.INTRO.values()))
+    assert not re.search(r"\d\.\d", re.sub(r"<[^>]+>", "", manual))

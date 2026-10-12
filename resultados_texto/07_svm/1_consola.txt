@@ -1,0 +1,13 @@
+clasificación  train: (1669, 20) | test: (418, 20) | huella del test: 8d9af7b40ee9
+regresión      train: (1669, 19) | test: (418, 19) | huella del test: 021799f95367
+features de regresión (sin NObeyesdad): ['Gender', 'Age', 'Height', 'family_history_with_overweight', 'FAVC', 'FCVC', 'NCP', 'CAEC', 'SMOKE', 'CH2O', 'SCC', 'FAF', 'TUE', 'CALC', 'MTRANS_Automobile', 'MTRANS_Bike', 'MTRANS_Motorbike', 'MTRANS_Public_Transportation', 'MTRANS_Walking']
+
+--- Por qué hay que escalar: rango de los atributos más amplios ---
+        rango en train (sin escalar)
+Weight                        121.64
+Age                            46.00
+CAEC                            3.00
+NCP                             3.00
+CALC                            3.00
+
+   [figura guardada] figures/07_svm/tablas/1_tabla1_por_que_hay_que_escalar_rango_de_los_atr.png

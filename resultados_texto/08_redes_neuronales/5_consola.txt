@@ -1,0 +1,28 @@
+   [calculando] nn_regresion ... (la primera vez tarda; luego queda en cache/)
+   [regresion] pequeña [32] semilla 42: val_loss 0.1792 (mejor época 69 de 99, 15.8 s)
+   [regresion] pequeña [32] semilla 43: val_loss 0.1487 (mejor época 112 de 142, 22.1 s)
+   [regresion] pequeña [32] semilla 44: val_loss 0.1387 (mejor época 109 de 139, 21.3 s)
+   [regresion] pequeña [32] semilla 45: val_loss 0.1454 (mejor época 121 de 151, 22.8 s)
+   [regresion] pequeña [32] semilla 46: val_loss 0.1345 (mejor época 223 de 253, 38.7 s)
+   [regresion] media [64, 32] semilla 42: val_loss 0.1079 (mejor época 32 de 62, 10.5 s)
+   [regresion] media [64, 32] semilla 43: val_loss 0.1315 (mejor época 21 de 51, 8.5 s)
+   [regresion] media [64, 32] semilla 44: val_loss 0.1190 (mejor época 28 de 58, 10.1 s)
+   [regresion] media [64, 32] semilla 45: val_loss 0.1254 (mejor época 29 de 59, 10.9 s)
+   [regresion] media [64, 32] semilla 46: val_loss 0.1243 (mejor época 42 de 72, 12.9 s)
+   [regresion] grande [128, 64, 32] semilla 42: val_loss 0.1086 (mejor época 10 de 40, 7.7 s)
+   [regresion] grande [128, 64, 32] semilla 43: val_loss 0.1069 (mejor época 32 de 62, 10.8 s)
+   [regresion] grande [128, 64, 32] semilla 44: val_loss 0.1144 (mejor época 20 de 50, 9.0 s)
+   [regresion] grande [128, 64, 32] semilla 45: val_loss 0.1212 (mejor época 22 de 52, 9.4 s)
+   [regresion] grande [128, 64, 32] semilla 46: val_loss 0.1197 (mejor época 15 de 45, 7.9 s)
+
+--- Regresión de Weight — arquitecturas (validación, 5 semillas) ---
+                      n_parametros  val_loss media  val_loss desv  val_loss semilla 42  mejor época (media)  épocas entrenadas (media)  tiempo medio (s)
+pequeña [32]                   673          0.1493         0.0176               0.1792                126.8                      156.8           24.1244
+media [64, 32]                3393          0.1216         0.0088               0.1079                 30.4                       60.4           10.5802
+grande [128, 64, 32]         12929          0.1142         0.0064               0.1086                 19.8                       49.8            8.9565
+
+   [figura guardada] figures/08_redes_neuronales/tablas/5_tabla1_regresion_de_weight_arquitecturas_valida.png
+   [figura guardada] figures/08_redes_neuronales/5_curvas_perdida_reg.png
+Arquitectura elegida (menor val_loss media): grande [128, 64, 32]
+   pequeña [32]: val_loss media +0.0352 respecto a la elegida (5.5 desviaciones de la elegida)
+   media [64, 32]: val_loss media +0.0074 respecto a la elegida (1.2 desviaciones de la elegida)

@@ -1,0 +1,25 @@
+Arquitectura: grande [128, 64, 32] · 12,929 parámetros · mejor época 10 de 40 entrenadas (semilla 42)
+
+--- Red neuronal (regresión) en test, en kg: semilla 42, media ± desv. de 5 semillas y baseline ---
+             semilla 42  media 5 semillas  desv. 5 semillas  baseline (media del sub-train)
+MAE              7.3545            6.7590            0.3672                         21.7147
+RMSE            11.6764           10.4756            0.6898                         25.9134
+R2               0.7969            0.8360            0.0224                         -0.0002
+R2_adj           0.7872            0.8282            0.0234                         -0.0479
+mejor_epoca     10.0000           19.8000            8.2583                             NaN
+epocas          40.0000           49.8000            8.2583                             NaN
+tiempo_s         7.7244            8.9565            1.2355                             NaN
+
+   [figura guardada] figures/08_redes_neuronales/tablas/5.1_tabla1_red_neuronal_regresion_en_test_en_kg_sem.png
+
+--- Red neuronal (regresión) en test, por semilla ---
+       MAE     RMSE      R2  R2_adj  mejor_epoca  epocas  tiempo_s
+42  7.3545  11.6764  0.7969  0.7872           10      40    7.7244
+43  6.3748   9.9696  0.8520  0.8449           32      62   10.7953
+44  6.5668  10.1298  0.8472  0.8399           20      50    8.9512
+45  6.7447  10.4123  0.8385  0.8308           22      52    9.3723
+46  6.7544  10.1898  0.8453  0.8380           15      45    7.9395
+
+   [figura guardada] figures/08_redes_neuronales/5.1_pred_vs_real_red.png
+   [figura guardada] figures/08_redes_neuronales/5.1_residuos_vs_predicho_red.png
+Predicciones fuera del rango del sub-train [39.4, 173.0] kg: 0 (mín 43.35, máx 165.99)

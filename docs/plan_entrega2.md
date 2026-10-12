@@ -10,7 +10,7 @@ y ejecución completa con `run_all.py`.
 > anterior. De la Entrega 1 sólo queda `data/resultados_entrega1.csv`. Las secciones T0-T7
 > describen el proyecto tal como era en cada momento.
 
-Estado: **T8 terminada (proyecto sólo con la Entrega 2). Espera tu verificación para empezar T9.**
+Estado: **T9 terminada. Espera tu verificación.**
 
 ---
 
@@ -301,8 +301,8 @@ estudio y `decisiones.md`.
 | T4 | 2026-10-12 | Opus | Opus | Terminada (OK recibido) | `d9c6c32` |
 | T5 | 2026-10-12 | Opus | Opus | Terminada (OK recibido) | `60baf41` |
 | T7 | 2026-10-12 | Opus | Opus | Terminada (OK recibido) | `4814738` |
-| T8. Quitar la Entrega 1 del proyecto (conservar sólo sus resultados) | 2026-10-12 | Opus | Opus | Terminada, espera verificación | (este commit) |
-| T9. HTML visual de la Entrega 2 (`estudio_entrega2.html`) | | Sonnet | | Pendiente | |
+| T8. Quitar la Entrega 1 del proyecto (conservar sólo sus resultados) | 2026-10-12 | Opus | Opus | Terminada (OK recibido) | `d1c4a0d` |
+| T9. HTML visual de la Entrega 2 (`estudio_entrega2.html`) | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada, espera verificación | (este commit) |
 
 ### T0 — Inspección
 
@@ -822,3 +822,47 @@ su propio proyecto; aquí solo se conservan sus resultados congelados
   `data/resultados_entrega2.csv` con la versión anterior: **solo cambian las columnas de
   tiempo**. Ningún archivo nuevo ni desaparecido. Todas las métricas, hiperparámetros, nº de
   vectores de soporte, épocas y conclusiones son idénticos.
+
+### T9 — HTML visual de la Entrega 2 (`estudio_entrega2.html`)
+
+**Cómo se hace**: la página se **genera** con `python generar_estudio.py` (y al final de
+`run_all.py`), igual que exportar un notebook ejecutado. Así ninguna cifra se escribe a mano.
+
+| Contenido de la página | De dónde sale |
+|---|---|
+| Tablas y notas de cada paso | `resultados_texto/<etapa>/<paso>.md` |
+| Salida completa de consola (desplegable) | `resultados_texto/<etapa>/<paso>_consola.txt` |
+| Figuras (ampliables) y tablas como imagen | `figures/<etapa>/` |
+| Indicadores de la portada | `data/resultados_entrega{1,2}.csv`, vía la etapa 09 |
+| Idea de cada paso (`IDEA`) y presentación de cada etapa (`INTRO`) | Escritas a mano, **sin resultados** |
+
+**Diseño**: el CSS y el JS de la antigua `estudio_etapas.html`, en `estudio/estilo.css` y
+`estudio/interaccion.js`. Incluye barra lateral, progreso por sección guardado en el
+navegador, pasos plegables, visor de figuras, filtro de tablas largas y tema oscuro. Se quitaron
+la tira de clases y la calculadora de IMC porque traían cifras de la E1 escritas a mano.
+"Ver código" enlaza a `etapas/…` en la rama `main` de GitHub, así que los enlaces funcionan
+cuando la rama se fusione.
+
+**Cambios en `src/` para que las notas y la consola queden guardadas** (solo con `--guardar`
+o `run_all.py`, como el resto de salidas):
+- `salida.nota()` añade la nota al `.md` del paso.
+- `Etapa.ejecutar()` guarda la consola del paso en `<paso>_consola.txt`.
+
+**Verificación**
+- `python run_all.py --limpiar-cache`: exit 0.
+
+| Etapa | 06 | 07 | 08 | 09 |
+|---|---|---|---|---|
+| Tiempo (s) | 15 | 524 | 674 | 2 |
+
+- Comparación celda a celda con lo versionado: **solo cambian columnas de tiempo**. Archivos
+  nuevos: las 39 consolas.
+- Página: 39 pasos, 69 figuras.
+  - En Chromium (Playwright): ninguna imagen rota, ningún error de JavaScript y sin
+    desbordamiento horizontal a 390 px.
+  - Se revisaron capturas de la portada, de los pasos 07·3.2 y 08·3 y de la vista móvil.
+- Cifras: **las 2838 cifras decimales del texto visible aparecen en las salidas ejecutadas**.
+  El texto escrito a mano solo contiene constantes de protocolo: 80/20, 418, 5 semillas, 42,
+  7 clases, capas 32/64/128 y 15 %.
+- `pytest` → **27 passed**. Nuevo test: el HTML tiene todos los pasos, cada paso tiene su
+  `IDEA` y el texto escrito a mano no lleva cifras con decimales.

@@ -1,0 +1,35 @@
+
+--- macro-F1 de CV: kernel lineal vs mejor kernel no lineal ---
+                       linear (cv)  mejor no lineal (cv)  no lineal − linear
+A (con Weight/Height)       0.9599                0.9650              0.0051
+B (sin Weight/Height)       0.6235                0.7964              0.1729
+
+   [figura guardada] figures/07_svm/tablas/3.2_tabla1_macro_f1_de_cv_kernel_lineal_vs_mejor_ke.png
+   [calculando] svm_por_que_lineal ... (la primera vez tarda; luego queda en cache/)
+
+--- SVC con SÓLO Weight y Height (macro-F1 de CV, 5 folds) ---
+                                       cv_f1_macro           mejores_params
+linear sobre (Weight, Height)               0.9484               {'C': 100}
+linear sobre (log Weight, log Height)       0.9505                {'C': 10}
+rbf sobre (Weight, Height)                  0.9650  {'C': 1000, 'gamma': 1}
+
+   [figura guardada] figures/07_svm/tablas/3.2_tabla2_svc_con_solo_weight_y_height_macro_f1_de.png
+
+La clase NObeyesdad se define por cortes del IMC = Weight / Height². Tomando logaritmos, log IMC =
+log Weight − 2·log Height: cada corte "IMC = c" es una RECTA en el plano (log Weight, log Height),
+así que las clases quedan separadas por rectas paralelas; en (Weight, Height) son las curvas Weight
+= c·Height², casi rectas en el rango de estaturas observado (figura del paso 1.1 de la etapa 06).
+Por eso en la variante A un clasificador lineal ya tiene la información decisiva casi en forma
+lineal: el hueco entre el mejor kernel no lineal y el lineal es de +0.0051 en A frente a +0.1729 en
+B, donde, sin Weight/Height, la relación de los hábitos con la clase no tiene esa forma. Con sólo
+dos atributos, el SVC lineal sobre (log Weight, log Height) logra macro-F1 de CV 0.9505, frente a
+0.9484 en kg/m y 0.9650 con rbf. Y un rbf con sólo esos dos atributos llega a 0.9650, frente a
+0.9650 del SVC rbf con las 20 features: en la variante A casi todo el rendimiento sale de Weight y
+Height. Las clases no son cortes perfectos del IMC (sus rangos se solapan, etapa 06 paso 1.1), lo
+que pone un techo a cualquier frontera basada sólo en Weight y Height.
+
+El rbf elegido en A también apunta a lo mismo: {'C': 100000, 'gamma': 0.0001}. Con gamma muy pequeño
+cada punto "alcanza" a casi todos los demás y la frontera se vuelve muy suave; compensado con un C
+enorme, el rbf se comporta prácticamente como un clasificador lineal. Por eso su óptimo se desplaza
+hacia la esquina C grande / gamma pequeño de la grilla.
+
