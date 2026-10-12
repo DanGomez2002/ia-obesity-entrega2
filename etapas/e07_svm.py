@@ -88,14 +88,16 @@ def make_models():
     def svc(kernel):
         return Pipeline([("scaler", StandardScaler()),
                          ("svc", SVC(kernel=kernel, cache_size=CACHE_MB))])
-    # Grillas ampliadas tras una primera pasada en la que el óptimo caía en el borde:
-    # linear C=100 (B), poly C=100 (A) y degree=3/gamma=0.1 (B), rbf C=1000 y gamma=0.001 (A).
+    # Grillas ampliadas en dos pasadas, hasta que ningún óptimo quedara en el borde:
+    # 1ª: linear C=100 (B), poly C=100 (A) y degree=3/gamma=0.1 (B), rbf C=1000/gamma=0.001 (A).
+    # 2ª: linear C=1000 (A), poly degree=4 (B), rbf C=1e5/gamma=1e-4 (A). Más allá de esos
+    # bordes la CV ya empeoraba (probado aparte), así que el óptimo es un máximo real.
     return {
-        "linear": (svc("linear"), {"svc__C": [0.01, 0.1, 1, 10, 100, 1000]}),
-        "poly": (svc("poly"), {"svc__C": [0.1, 1, 10, 100, 1000], "svc__degree": [2, 3, 4],
+        "linear": (svc("linear"), {"svc__C": [0.01, 0.1, 1, 10, 100, 1000, 10000]}),
+        "poly": (svc("poly"), {"svc__C": [0.1, 1, 10, 100, 1000], "svc__degree": [2, 3, 4, 5],
                                "svc__gamma": ["scale", 0.01, 0.1, 0.5], "svc__coef0": [0, 1]}),
-        "rbf": (svc("rbf"), {"svc__C": [0.1, 1, 10, 100, 1000, 10000, 100000],
-                             "svc__gamma": ["scale", 0.0001, 0.001, 0.01, 0.1, 1]}),
+        "rbf": (svc("rbf"), {"svc__C": [0.1, 1, 10, 100, 1000, 10000, 100000, 1000000],
+                             "svc__gamma": ["scale", 0.00001, 0.0001, 0.001, 0.01, 0.1, 1]}),
     }
 
 
@@ -176,9 +178,10 @@ def make_models_reg():
             transformer=StandardScaler())
     # Primera pasada: epsilon=0.2 (borde) en linear y poly, y C=0.1 (borde) en poly -> se
     # amplían. Se recortan dos zonas lentas y lejos del óptimo, medidas con un ajuste suelto:
-    # poly con C=100 (~150 s por ajuste) y linear con C=1000 (~150 s).
+    # poly con C=100 (~150 s por ajuste) y linear con C=1000 (~150 s). 2ª pasada: epsilon=0.5
+    # (borde) en linear -> se añade 1.0 (con 0.75 y 1.0 la CV ya empeoraba).
     p = "regressor__svr__"
-    eps = [0.01, 0.05, 0.1, 0.2, 0.3, 0.5]
+    eps = [0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 1.0]
     return {
         "linear": (svr("linear"), {f"{p}C": [0.1, 1, 10, 100], f"{p}epsilon": eps}),
         "poly": (svr("poly"), {f"{p}C": [0.01, 0.1, 1, 10], f"{p}epsilon": eps,
