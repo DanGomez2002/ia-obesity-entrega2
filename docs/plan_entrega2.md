@@ -377,9 +377,10 @@ es el de la etapa 02 (1669/418, huella `8d9af7b40ee9`, la misma que en la E1).
   ejecuciones; GaussianNB unos 0.005 s. El tiempo exacto de cada ejecución queda en
   `resultados_texto/06_naive_bayes/5.md`.
 - En el CSV entra, por variante, **solo el NB elegido por CV**: CategoricalNB en A y en B.
-- Como referencia de la E1 (sin interpretar todavía, eso es T5): NB queda por debajo del
-  Árbol y del RF en A y en B, y en A también por debajo de KNN… salvo que KNN-A tiene F1
-  0.8075, prácticamente empatado con NB-A (0.8030).
+- Referencia frente a la E1 (test macro-F1; la interpretación es de T5):
+  - A: NB 0.8030 · Árbol 0.9362 · RF 0.9558 · KNN 0.8075.
+  - B: NB 0.6624 · Árbol 0.7401 · RF 0.8528 · KNN 0.7567.
+  - NB es el último en ambas variantes; en A queda a 0.0045 de KNN.
 
 **Hallazgos que obligaron a corregir el código o las notas (reportados tal cual):**
 
