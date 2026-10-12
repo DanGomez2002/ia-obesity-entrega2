@@ -5,7 +5,7 @@ Este plan amplía el proyecto de la Entrega 1 **con su misma estructura**: la ve
 de `etapas/` + pasos numerados (`src/pasos.py`), con salidas en `figures/` y `resultados_texto/`
 y ejecución completa con `run_all.py`.
 
-Estado: **T4 terminada. Espera tu verificación para empezar T5.**
+Estado: **T5 terminada. Espera tu verificación para empezar T7.**
 
 ---
 
@@ -293,8 +293,8 @@ estudio y `decisiones.md`.
 | T1 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada (OK recibido) | `2267801` |
 | T2 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada (OK recibido) | `c56fe7d` |
 | T3 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada (OK recibido) | `f7a96a0` |
-| T4 | 2026-10-12 | Opus | Opus | Terminada, espera verificación | (este commit) |
-| T5 | | Opus | | Pendiente | |
+| T4 | 2026-10-12 | Opus | Opus | Terminada (OK recibido) | `d9c6c32` |
+| T5 | 2026-10-12 | Opus | Opus | Terminada, espera verificación | (este commit) |
 | T7 | | Opus | | Pendiente | |
 
 ### T0 — Inspección
@@ -593,3 +593,78 @@ Mejor época media / épocas entrenadas medias:
 `_comparar` / `comparacion` (en caché), `resumen_arquitecturas`, `elegida`, `_evaluar` /
 `evaluacion`. En caché se guardan historiales, pesos y métricas, no el objeto Keras; el
 modelo se reconstruye con `set_weights`.
+
+### T5 — Etapa 09, Comparación final
+
+Ejecución: `python etapas/e09_comparacion_final.py --todo --guardar --sin-ventanas`. Sin
+errores, 6 pasos, menos de 3 s, porque solo lee `data/resultados_entrega{1,2}.csv`. Salidas en
+`resultados_texto/09_comparacion_final/` y `figures/09_comparacion_final/`.
+
+**Verificaciones (paso 1)**
+- Por tarea hay una sola huella de test y n_test = 418 en todas las filas: A y B
+  `8d9af7b40ee9`, regresión `021799f95367`.
+- Recuento: 6 / 6 / 5 modelos (más el baseline), una fila por familia.
+- La E1 congelada coincide con las tablas actuales de `resultados_texto/` de las etapas 02,
+  03 y 05.
+
+**Discrepancias con el encargo (paso 1.1)**: coinciden 25 de 28 valores. Las 3 discrepancias
+son las ya detectadas en T0:
+- Árbol A, F1: 0.938 en el encargo, 0.9362 ejecutado. 0.938 es la accuracy.
+- KNN A, F1: 0.814 frente a 0.8075.
+- KNN B, F1: 0.764 frente a 0.7567. 0.764 es el F1 de CV.
+
+**Tablas finales (test de 418; la red, con semilla 42 y media ± desviación de 5 semillas)**
+
+Clasificación A, por macro-F1:
+
+| Puesto | Modelo | Entrega | Accuracy | macro-F1 | Errores en test | CV |
+|---|---|---|---|---|---|---|
+| 1 | SVM (SVC rbf) | E2 | 0.9689 | **0.9678** | 13 | 0.9650 |
+| 2 | Random Forest | E1 | 0.9569 | 0.9558 | 18 | 0.9437 |
+| 3 | Árbol de decisión | E1 | 0.9378 | 0.9362 | 26 | 0.9230 |
+| 4 | Red neuronal [32] | E2 | 0.9258 | 0.9227 (media 0.9261 ± 0.0077) | 31 | val_loss 0.2380 |
+| 5 | KNN | E1 | 0.8206 | 0.8075 | 75 | 0.8152 |
+| 6 | Naive Bayes (CategoricalNB) | E2 | 0.8086 | 0.8030 | 80 | 0.7810 |
+
+Clasificación B, por macro-F1:
+
+| Puesto | Modelo | Entrega | Accuracy | macro-F1 | Errores en test | CV |
+|---|---|---|---|---|---|---|
+| 1 | Random Forest | E1 | 0.8565 | **0.8528** | 60 | 0.8506 |
+| 2 | SVM (SVC rbf) | E2 | 0.7871 | 0.7830 | 89 | 0.7964 |
+| 3 | KNN | E1 | 0.7679 | 0.7567 | 97 | 0.7640 |
+| 4 | Árbol de decisión | E1 | 0.7464 | 0.7401 | 106 | 0.7440 |
+| 5 | Red neuronal [128, 64, 32] | E2 | 0.7464 | 0.7327 (media 0.7489 ± 0.0143) | 106 | val_loss 0.8455 |
+| 6 | Naive Bayes (CategoricalNB) | E2 | 0.6914 | 0.6624 | 129 | 0.6523 |
+
+Regresión, por RMSE (kg):
+
+| Puesto | Modelo | Entrega | MAE | RMSE | R² | R²adj | CV |
+|---|---|---|---|---|---|---|---|
+| 1 | Random Forest | E1 | 4.8386 | **8.2468** | 0.8987 | 0.8939 | 9.1156 |
+| 2 | KNN | E1 | 5.0484 | 9.9085 | 0.8538 | 0.8468 | 10.3709 |
+| 3 | SVM (SVR rbf) | E2 | 6.2617 | 10.0951 | 0.8482 | 0.8410 | 9.4351 |
+| 4 | Árbol de regresión | E1 | 6.5810 | 10.4655 | 0.8369 | 0.8291 | 12.4728 |
+| 5 | Red neuronal [128, 64, 32] | E2 | 7.3545 | 11.6764 (media 10.4756 ± 0.6898) | 0.7969 | 0.7872 | val_loss 0.1086 |
+| — | Baseline (media) | E1 | 21.7064 | 25.9126 | −0.0001 | −0.0479 | — |
+
+**Puesto medio por familia (paso 3)**: Random Forest 1.33 · SVM 2.00 · KNN 3.33 · Árbol 3.67
+· Red neuronal 4.67 · Naive Bayes 6.00 (solo clasificación).
+
+**Conclusiones (paso 5, generadas con f-strings sobre los CSV)**
+- A: gana el SVM, por 5 instancias sobre el RF. Hay fuga: un rbf solo con Weight y Height
+  logra la misma CV, 0.9650.
+- B: gana el RF por 29 instancias sobre el SVM.
+- Regresión: gana el RF con 8.25 kg.
+- La red no supera al RF en ninguna tarea, ni con la semilla 42 ni con la media de 5
+  semillas.
+- Naive Bayes queda último en A y en B, aunque es el más barato (0.018 s por ajuste).
+- Los ganadores por CV coinciden con los de test en las tres tareas (sin contar la red).
+- El 76.5 % de las filas tiene respuestas no enteras, la marca de SMOTE; está calculado con
+  `e02.filas_reales`.
+- K-Means: solo como nota (ARI 0.1564).
+
+**Cambios en código compartido**: `src/resultados.leer_tabla_md` ahora deja como texto las
+columnas no numéricas; antes fallaba con la columna `mejores_params`. Como las etapas 06-08
+importan `src/resultados.py`, su caché se recalculará en la próxima ejecución, la de T7. Sus
+números no deberían cambiar, y T7 lo comprobará.

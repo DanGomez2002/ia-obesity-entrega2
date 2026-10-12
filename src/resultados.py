@@ -62,7 +62,13 @@ def leer_tabla_md(ruta, titulo: str) -> pd.DataFrame:
     cabecera, cuerpo = filas[0], filas[2:]          # filas[1] es el separador |:---|
     df = pd.DataFrame(cuerpo, columns=cabecera).set_index(cabecera[0])
     df.index.name = None
-    return df.replace("—", np.nan).apply(pd.to_numeric)
+    df = df.replace("—", np.nan)
+    for col in df.columns:                  # numéricas a número; las de texto se dejan igual
+        try:
+            df[col] = pd.to_numeric(df[col])
+        except (ValueError, TypeError):
+            pass
+    return df
 
 
 # Qué tabla de resultados_texto/ alimenta cada tarea de la Entrega 1

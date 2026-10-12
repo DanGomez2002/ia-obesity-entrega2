@@ -1,0 +1,7 @@
+modelo,puesto,entrega,familia,accuracy,f1_macro,errores en test (de 418),cv (macro-F1; red: val_loss),f1 media 5 semillas,f1 desv 5 semillas
+SVM (SVC rbf),1,E2,SVM,0.9689,0.9678,13,0.9650,—,—
+Random Forest,2,E1,Random Forest,0.9569,0.9558,18,0.9437,—,—
+Árbol de decisión,3,E1,Árbol,0.9378,0.9362,26,0.9230,—,—
+Red neuronal pequeña [32],4,E2,Red neuronal,0.9258,0.9227,31,0.2380,0.9261,0.0077
+KNN,5,E1,KNN,0.8206,0.8075,75,0.8152,—,—
+Naive Bayes (CategoricalNB),6,E2,Naive Bayes,0.8086,0.8030,80,0.7810,—,—
