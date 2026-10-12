@@ -572,7 +572,8 @@ Mejor época media / épocas entrenadas medias:
    - B grande: mínimo en la época 9 con la semilla 42.
    - Regresión grande: mínimo en la época 10.
    - El early stopping recupera esos pesos, pero no hay regularización (dropout/L2), que el
-     plan dejó fuera a propósito. **Queda como decisión abierta para ti** (ver mensaje).
+     plan dejó fuera a propósito. **Decisión del usuario: no añadir regularización.** Se
+     mantiene el protocolo aprobado; el sobreajuste se discute en las conclusiones de T5.
 2. **La semilla 42 es la peor de las 5 en B y en regresión.**
    - B, macro-F1: 0.7327, frente a 0.7449-0.7715 de las otras semillas.
    - Regresión, RMSE: 11.68, frente a 9.97-10.41.
