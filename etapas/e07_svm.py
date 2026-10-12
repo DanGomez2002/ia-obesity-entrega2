@@ -92,8 +92,11 @@ def make_models():
     # 1ª: linear C=100 (B), poly C=100 (A) y degree=3/gamma=0.1 (B), rbf C=1000/gamma=0.001 (A).
     # 2ª: linear C=1000 (A), poly degree=4 (B), rbf C=1e5/gamma=1e-4 (A). Más allá de esos
     # bordes la CV ya empeoraba (probado aparte), así que el óptimo es un máximo real.
+    # Excepción: linear se queda en C ≤ 1000. Con C=3000 y C=10000 la CV de A baja (0.9593 y
+    # 0.9547, frente a 0.9599 con C=1000; medido aparte) y en B, que no es separable, un solo
+    # ajuste con C=10000 pasa de 10 minutos (libsvm converge más despacio cuanto mayor es C).
     return {
-        "linear": (svc("linear"), {"svc__C": [0.01, 0.1, 1, 10, 100, 1000, 10000]}),
+        "linear": (svc("linear"), {"svc__C": [0.01, 0.1, 1, 10, 100, 1000]}),
         "poly": (svc("poly"), {"svc__C": [0.1, 1, 10, 100, 1000], "svc__degree": [2, 3, 4, 5],
                                "svc__gamma": ["scale", 0.01, 0.1, 0.5], "svc__coef0": [0, 1]}),
         "rbf": (svc("rbf"), {"svc__C": [0.1, 1, 10, 100, 1000, 10000, 100000, 1000000],
