@@ -20,6 +20,7 @@ DEF_ARBOLES = {
 }
 DEF_RUIDO = {"max": 20, "paso": 5}
 DEF_REALES = {"incluir_wh": False, "repeticiones": 3}
+DEF_REALES_REG = {"repeticiones": 3}
 CRITERIOS = {"clf": ["gini", "entropy", "log_loss"], "reg": ["squared_error", "friedman_mse"]}
 N_ARBOLES_OPCIONES = [10, 25, 50, 100, 200, 400, 800]
 MAX_ARBOLES = 2000   # tope de los números escritos a mano (cada uno se entrena 6 veces: CV 5 + fit)
@@ -98,6 +99,15 @@ def features_b(p):
         _parar("warning", "La variante B (sin Weight ni Height) se queda sin features: "
                           "añade otras en el paso 1.")
     return fb
+
+
+def features_sin_height(p):
+    """Features de la variante sin Height de regresión. Avisa y para si no queda ninguna."""
+    fs = [f for f in p["features"] if f not in M.DROP_H]
+    if not fs:
+        _parar("warning", "La variante sin Height se queda sin features: añade otras en el "
+                          "paso 1.")
+    return fs
 
 
 # ----------------------------------------------------------------------------
@@ -238,16 +248,18 @@ def form_n_arboles(tarea):
     return p
 
 
-def form_ruido():
+def form_ruido(tarea="clf"):
+    clave = "ruido" if tarea == "clf" else f"ruido_{tarea}"
+
     def construir(p):
         return {"max": st.select_slider("Ruido máximo (% de la desviación típica)",
                                         [5, 10, 15, 20, 30, 40], value=int(p["max"]),
-                                        key="ruido_max"),
+                                        key=f"{clave}_max"),
                 "paso": st.selectbox("Paso", [5, 10], index=[5, 10].index(int(p["paso"])),
-                                     key="ruido_paso")}
+                                     key=f"{clave}_paso")}
 
     with st.expander("Parámetros del ruido", expanded=True):
-        return formulario("ruido", construir, DEF_RUIDO, "Calcular")
+        return formulario(clave, construir, DEF_RUIDO, "Calcular")
 
 
 def form_reales():
@@ -259,6 +271,15 @@ def form_reales():
 
     with st.expander("Parámetros de la evaluación", expanded=True):
         return formulario("reales", construir, DEF_REALES, "Calcular")
+
+
+def form_reales_reg():
+    def construir(p):
+        return {"repeticiones": st.slider("Repeticiones de la CV de 3 folds", 1, 10,
+                                          int(p["repeticiones"]), key="reales_reg_rep")}
+
+    with st.expander("Parámetros de la evaluación", expanded=True):
+        return formulario("reales_reg", construir, DEF_REALES_REG, "Calcular")
 
 
 # ----------------------------------------------------------------------------

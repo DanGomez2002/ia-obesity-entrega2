@@ -297,3 +297,21 @@ def plot_n_estimators_curve(df, col_cv, col_test, ylabel, titulo, col_std=None,
         ax.get_xaxis().set_minor_formatter(NullFormatter())
         ax.grid(alpha=0.3, which="major")
     return fig, n_suficiente
+
+
+def plot_residuos_vs_pred(y_test, preds):
+    """Residuos (real − predicho) frente al valor predicho, un panel por modelo."""
+    y_test = np.asarray(y_test)
+    lim = max(np.abs(y_test - np.asarray(p)).max() for p in preds.values()) * 1.05
+    fig, axes = plt.subplots(1, len(preds), figsize=(6 * len(preds), 4.5), sharey=True)
+    for ax, (nombre, y_pred) in zip(np.atleast_1d(axes), preds.items()):
+        y_pred = np.asarray(y_pred)
+        ax.scatter(y_pred, y_test - y_pred, s=12, alpha=0.5, color="steelblue")
+        ax.axhline(0, c="r", ls="--", lw=1.2)
+        ax.set_ylim(-lim, lim)
+        ax.set_xlabel("Predicho (kg)")
+        ax.set_ylabel("Residuo: real − predicho (kg)")
+        ax.set_title(f"Residuos vs predicho — {nombre}")
+        ax.grid(alpha=0.3)
+    fig.tight_layout()
+    return fig

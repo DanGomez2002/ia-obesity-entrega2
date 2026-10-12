@@ -114,7 +114,7 @@ def resumen_k(b, g):
     }, name="K óptimo")
 
 
-def fig_cinco_metodos(b, g):
+def fig_cinco_metodos(b, g, titulo=None):
     """Panel 2x3 con los cinco métodos de elección de K (como el paso 4.1 de la etapa 04)."""
     m, (gap_df, k_gap) = b["metrics"], g
     r = resumen_k(b, g)
@@ -144,6 +144,8 @@ def fig_cinco_metodos(b, g):
     ax.set_ylabel("gap(K)")
     ax.set_title("5. Estadístico gap")
     axes[1, 2].axis("off")
+    if titulo:
+        fig.suptitle(titulo)
     return fig
 
 

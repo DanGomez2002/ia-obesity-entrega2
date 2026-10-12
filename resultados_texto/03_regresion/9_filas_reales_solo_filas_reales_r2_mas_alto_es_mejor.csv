@@ -1,0 +1,5 @@
+CV 3 folds × 10 repeticiones,Sin Height
+Línea base,-0.010192274481357674
+"Árbol (depth 8, leaf 5)",0.07681168155555142
+Random Forest,0.1512934269410354
+"KNN (k=3, distance)",-0.063100127292038

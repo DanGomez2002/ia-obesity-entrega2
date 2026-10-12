@@ -1,0 +1,6 @@
+categoria,macro-F1 (± desv. entre folds)
+Línea base,0.10423246908632845
+"Árbol (depth 4, leaf 5)",0.15642423863932425
+Random Forest,0.17366587048375573
+"KNN (k=15, distance)",0.15201672137368877
+KNN (k=1),0.19420260255650634

@@ -1,0 +1,11 @@
+### Modelos del proyecto: error en las filas reales vs sintéticas del test
+
+|                                 |   MAE reales |   MAE sintéticas |   RMSE reales |   RMSE sintéticas |
+|:--------------------------------|-------------:|-----------------:|--------------:|------------------:|
+| Con Height · Árbol de regresión |       9.4996 |           5.5768 |       12.8818 |            9.4931 |
+| Con Height · Random Forest      |       8.9222 |           3.4337 |       12.4632 |            6.1617 |
+| Con Height · KNN                |      12.2331 |           2.5764 |       16.8912 |            5.8132 |
+| Sin Height · Árbol de regresión |      12.1304 |           5.8207 |       16.8054 |           10.6161 |
+| Sin Height · Random Forest      |      10.2415 |           3.4596 |       14.1105 |            5.805  |
+| Sin Height · KNN                |      12.3151 |           3.5565 |       17.1796 |            6.8164 |
+

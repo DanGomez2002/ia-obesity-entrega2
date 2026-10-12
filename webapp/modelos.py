@@ -23,10 +23,12 @@ from src.data import TARGET_CLF, TARGET_REG
 from src.evaluation import clf_metrics, reg_metrics, results_table
 from src.preprocessing import cargar_clf, cargar_reg
 from etapas import e02_clasificacion as e02
+from etapas import e03_regresion as e03
 
 MODELOS_CLF = ("Árbol de decisión", "Random Forest", "KNN")
 MODELOS_REG = ("Árbol de regresión", "Random Forest", "KNN")
 DROP_WH = ["Weight", "Height"]
+DROP_H = e03.DROP_H
 
 HP_CLF = {
     "Árbol de decisión": {"criterion": "gini", "max_depth": 10, "min_samples_leaf": 1},
@@ -298,3 +300,45 @@ def _evaluar_reales(incluir_wh, n_clases, repeticiones, seed):
 
 def evaluar_reales(incluir_wh, n_clases, repeticiones, seed):
     return _evaluar_reales(bool(incluir_wh), int(n_clases), int(repeticiones), int(seed))
+
+
+# ----------------------------------------------------------------------------
+# Variantes de regresión (pasos 9 y 10 de la etapa 03)
+# ----------------------------------------------------------------------------
+def _reales_reg():
+    df = cargar_reg()
+    X, y = df[features_reg()], df[TARGET_REG]
+    return X, y, e02.filas_reales(X)
+
+
+@lru_cache(maxsize=1)
+def peso_reales_reg():
+    """describe() de Weight en las filas reales y en las sintéticas."""
+    _, y, r = _reales_reg()
+    return pd.DataFrame({"filas reales": y[r].describe(), "filas sintéticas": y[~r].describe()})
+
+
+@lru_cache(maxsize=16)
+def _evaluar_reales_reg(incluir_height, repeticiones, seed):
+    X, y, r = _reales_reg()
+    X, y = X[r], y[r]
+    if not incluir_height:
+        X = X.drop(columns=DROP_H)
+    return e03.cv_reales(X, y, repeticiones, seed)
+
+
+def evaluar_reales_reg(incluir_height, repeticiones, seed):
+    return _evaluar_reales_reg(bool(incluir_height), int(repeticiones), int(seed))
+
+
+@lru_cache(maxsize=8)
+def _barrido_ruido_reg(incluir_height, test_size, seed, niveles):
+    d = _split_reg(tuple(features_reg()), test_size, seed)
+    sin = [] if incluir_height else DROP_H
+    return e03.barrido_ruido(d["X_train"].drop(columns=sin), d["X_test"].drop(columns=sin),
+                             d["y_train"], d["y_test"], niveles)
+
+
+def barrido_ruido_reg(incluir_height, test_size, seed, niveles):
+    return _barrido_ruido_reg(bool(incluir_height), float(test_size), int(seed),
+                              tuple(float(n) for n in niveles))

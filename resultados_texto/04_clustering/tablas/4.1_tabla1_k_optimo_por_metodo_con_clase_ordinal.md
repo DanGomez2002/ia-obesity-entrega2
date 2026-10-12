@@ -1,0 +1,10 @@
+### K óptimo por método (con clase ordinal)
+
+|                         |   K óptimo (con clase ordinal) |
+|:------------------------|-------------------------------:|
+| Codo (inercia)          |                              5 |
+| Silueta (max)           |                              2 |
+| Calinski-Harabasz (max) |                              3 |
+| Davies-Bouldin (min)    |                              9 |
+| Gap statistic           |                              2 |
+

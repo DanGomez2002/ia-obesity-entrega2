@@ -5,7 +5,9 @@ import seaborn as sns
 import streamlit as st
 from sklearn.tree import plot_tree
 
-from src.evaluation import plot_k_curve, plot_n_estimators_curve, reg_metrics, tree_summary
+from etapas import e03_regresion as e03
+from src.evaluation import (plot_k_curve, plot_n_estimators_curve, plot_residuos_vs_pred,
+                            reg_metrics, tree_summary)
 from webapp import controles as C
 from webapp import modelos as M
 from webapp import ui
@@ -121,6 +123,8 @@ def paso_4():
         ax.set_xlabel("Real − Predicho (kg)")
         ax.set_ylabel("Frecuencia")
     ui.figura(fig)
+    preds = {n: r["y_pred"] for n, r in modelos.items()}
+    ui.figura(plot_residuos_vs_pred(d["y_test"], preds))
 
 
 def paso_5():
@@ -150,5 +154,56 @@ def paso_6():
     ui.tabla(t, "Tabla de resultados")
 
 
+def paso_8():
+    hp = C.form_hp("reg")
+    sp = C.params_split("reg")
+    sin = C.features_sin_height(sp)
+    _, t_con, _ = _entrenar(hp)
+    with st.spinner("Entrenando sin Height…"):
+        res, t_sin, d = M.tabla_reg(hp, sin, sp["test_size"], sp["seed"])
+    ui.tabla(t_sin, "Sin Height — RMSE de CV y métricas en test")
+    comp = pd.concat({"Con Height": t_con, "Sin Height": t_sin}, axis=0)
+    ui.tabla(comp, "Comparación con Height vs sin Height")
+    ui.figura(e03.figura_con_sin_height(comp))
+    imp = pd.Series(res["Random Forest"]["modelo"].feature_importances_,
+                    index=d["X_train"].columns).sort_values(ascending=False)
+    ui.tabla(imp.rename("importancia"), "Importancias RF (sin Height)")
+    fig, ax = plt.subplots(figsize=(8, 6))
+    sns.barplot(x=imp.values, y=imp.index, ax=ax, color="indianred")
+    ax.set_title("Importancia de features — Random Forest (sin Height)")
+    ax.set_xlabel("Importancia (reducción de impureza)")
+    ui.figura(fig)
+
+
+def paso_9():
+    p = C.form_reales_reg()
+    sp = C.params_split("reg")
+    rep = p["repeticiones"]
+    with st.spinner("Validación cruzada sobre las filas reales…"):
+        con = M.evaluar_reales_reg(True, rep, sp["seed"])
+        sin = M.evaluar_reales_reg(False, rep, sp["seed"])
+    ui.tabla(M.peso_reales_reg(), "Weight en las filas reales vs sintéticas", 1)
+    ui.tabla(con, f"Sólo filas reales · con Height (CV 3×{rep})")
+    ui.tabla(sin, f"Sólo filas reales · sin Height (CV 3×{rep})")
+    ui.figura(e03.figura_reales(con, sin, f"CV 3 folds × {rep} repeticiones"))
+
+
+def paso_10():
+    p = C.form_ruido("reg")
+    sp = C.params_split("reg")
+    niveles = tuple(x / 100 for x in range(0, p["max"] + 1, p["paso"]))
+    barridos = {}
+    with st.spinner("Entrenando con ruido…"):
+        for variante, con_h in (("con Height", True), ("sin Height", False)):
+            barridos[variante] = M.barrido_ruido_reg(con_h, sp["test_size"], sp["seed"], niveles)
+    for variante, df in barridos.items():
+        rmse = df.pivot(index="nivel", columns="modelo", values="RMSE")
+        ui.tabla(rmse.rename_axis("Nivel de ruido (%)"),
+                 f"RMSE en test por nivel de ruido ({variante})")
+        ui.tabla((rmse - rmse.loc[0]).rename_axis("Nivel de ruido (%)"),
+                 f"Aumento del RMSE respecto a sin ruido, en kg ({variante})")
+    ui.figura(e03.figura_ruido(barridos))
+
+
 RENDER = {"1": paso_1, "2": paso_2, "2.1": paso_2_1, "2.2": paso_2_2, "3": paso_3,
-          "4": paso_4, "5": paso_5, "6": paso_6}
+          "4": paso_4, "5": paso_5, "6": paso_6, "8": paso_8, "9": paso_9, "10": paso_10}

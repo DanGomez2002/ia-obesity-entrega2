@@ -1,0 +1,9 @@
+### Clustering K-Means con K=7 comparado con las clases reales
+
+|                         |   silueta |    ARI |    NMI |   pureza |
+|:------------------------|----------:|-------:|-------:|---------:|
+| Sin clase (20 features) |    0.1315 | 0.0883 | 0.1575 |   0.3057 |
+| Sólo numéricas (8)      |    0.1647 | 0.1564 | 0.2618 |   0.3824 |
+| Con clase ordinal       |    0.1555 | 0.252  | 0.3584 |   0.4255 |
+| Con clase one-hot       |    0.2279 | 0.9989 | 0.9984 |   0.9995 |
+

@@ -194,11 +194,13 @@ def paso_4():
 
 def paso_4_1():
     p = C.form_clu(rango=True)
-    g = _con_gap("ord", p)
-    b = _b("ord", p)
-    ui.figura(CL.fig_cinco_metodos(b, g))
-    ui.tabla(CL.resumen_k(b, g).rename("K óptimo (con clase ordinal)"),
-             "K óptimo por método (con clase ordinal)")
+    for nombre, v in (("ordinal", "ord"), ("one-hot", "oh")):
+        g = _con_gap(v, p)
+        b = _b(v, p)
+        ui.subtitulo(f"Con clase {nombre}")
+        ui.figura(CL.fig_cinco_metodos(b, g, f"Elección de K con clase {nombre}"))
+        ui.tabla(CL.resumen_k(b, g).rename(f"K óptimo (con clase {nombre})"),
+                 f"K óptimo por método (con clase {nombre})")
 
 
 def paso_4_2():
@@ -229,8 +231,10 @@ def paso_4_3():
 
 def paso_4_4():
     p = C.form_clu(k=True)
-    ui.figura(CL.fig_pca("ord", _km("ord", p).labels_,
-                         f"Clusters K-Means K={p['k']} (con clase ordinal)"))
+    for nombre, v in (("ordinal", "ord"), ("one-hot", "oh")):
+        ui.subtitulo(f"Con clase {nombre}")
+        ui.figura(CL.fig_pca(v, _km(v, p).labels_,
+                             f"Clusters K-Means K={p['k']} (con clase {nombre})"))
 
 
 # ----------------------------------------------------------------------------

@@ -81,4 +81,4 @@ def test_barrido_ruido_incluye_el_nivel_cero_y_cuatro_modelos():
 def test_evaluar_reales_devuelve_la_linea_base_y_metricas():
     t = M.evaluar_reales(False, 3, 1, 42)
     assert "Línea base (clase mayoritaria)" in t.index
-    assert {"accuracy", "balanced_accuracy", "f1_macro", "f1_macro_std"} <= set(t.columns)
+    assert {"accuracy", "f1_macro", "f1_macro_std"} <= set(t.columns)

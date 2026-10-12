@@ -1,0 +1,5 @@
+categoria,test_R2_adj
+Baseline (media),-0.0479
+Árbol de regresión,0.8291
+Random Forest,0.8939
+KNN,0.8468

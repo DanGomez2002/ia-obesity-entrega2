@@ -242,21 +242,17 @@ def paso_8():
     ui.tabla(t7, "Sólo filas reales · 7 clases (CV de 3 folds repetida)")
     ui.tabla(t3, "Sólo filas reales · 3 clases agrupadas (CV de 3 folds repetida)")
     fig, axes = plt.subplots(1, 2, figsize=(15, 5), sharey=True)
-    for ax, t, azar, titulo in [(axes[0], t7, 1 / 7, "7 clases"),
-                                (axes[1], t3, 1 / 3, "3 clases agrupadas")]:
+    for ax, t, titulo in [(axes[0], t7, "7 clases"), (axes[1], t3, "3 clases agrupadas")]:
         x = np.arange(len(t))
-        ax.bar(x - 0.2, t["balanced_accuracy"], 0.4, label="balanced accuracy", color="#4c78a8")
-        ax.bar(x + 0.2, t["f1_macro"], 0.4, yerr=t["f1_macro_std"], capsize=3,
+        ax.bar(x, t["f1_macro"], 0.6, yerr=t["f1_macro_std"], capsize=3,
                label="macro-F1 (± desv. entre folds)", color="#f58518")
-        ax.axhline(azar, ls="--", color="gray", lw=1.2,
-                   label=f"azar en balanced acc. (1/{round(1 / azar)})")
         ax.set_xticks(x, [n.replace(" (clase mayoritaria)", "") for n in t.index],
                       rotation=20, ha="right")
         ax.set_title(f"Filas reales · {titulo} · {'con' if p['incluir_wh'] else 'sin'} Weight/Height")
         ax.grid(axis="x", visible=False)
         ax.grid(axis="y", alpha=0.3)
         ax.legend(loc="upper right", fontsize=9)
-    axes[0].set_ylabel("métrica")
+    axes[0].set_ylabel("macro-F1")
     ui.figura(fig)
 
 

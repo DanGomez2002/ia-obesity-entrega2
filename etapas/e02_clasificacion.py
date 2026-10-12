@@ -145,8 +145,8 @@ def arboles_prepoda():
         d = datos()
         arboles = {
             "Completo":   DecisionTreeClassifier(random_state=RANDOM_STATE),
-            "Podado":     DecisionTreeClassifier(max_depth=6, min_samples_leaf=5, random_state=RANDOM_STATE),
-            "Muy podado": DecisionTreeClassifier(max_depth=3, min_samples_leaf=10, random_state=RANDOM_STATE),
+            "Podado":     DecisionTreeClassifier(max_depth=4, min_samples_leaf=5, random_state=RANDOM_STATE),
+            "Muy podado": DecisionTreeClassifier(max_depth=2, min_samples_leaf=10, random_state=RANDOM_STATE),
         }
         for a in arboles.values():
             a.fit(d["X_train"], d["y_train"])
@@ -511,7 +511,7 @@ COLS_ENCUESTA = ["Age", "FCVC", "NCP", "CH2O", "FAF", "TUE"]
 GRUPOS_3 = {"Insufficient_Weight": "Bajo/Normal", "Normal_Weight": "Bajo/Normal",
             "Overweight_Level_I": "Sobrepeso", "Overweight_Level_II": "Sobrepeso",
             "Obesity_Type_I": "Obesidad", "Obesity_Type_II": "Obesidad", "Obesity_Type_III": "Obesidad"}
-METRICAS_REALES = ["accuracy", "balanced_accuracy", "f1_macro"]
+METRICAS_REALES = ["accuracy", "f1_macro"]
 BASELINE_REALES = "Línea base (clase mayoritaria)"
 
 
@@ -527,9 +527,6 @@ def _modelos_reales():
         "Árbol (depth 4, leaf 5)": DecisionTreeClassifier(max_depth=4, min_samples_leaf=5,
                                                           random_state=RANDOM_STATE),
         "Random Forest": RandomForestClassifier(n_estimators=200, random_state=RANDOM_STATE, n_jobs=-1),
-        "RF con pesos por clase": RandomForestClassifier(n_estimators=200, min_samples_leaf=3,
-                                                         class_weight="balanced",
-                                                         random_state=RANDOM_STATE, n_jobs=-1),
         "KNN (k=15, distance)": Pipeline([("scaler", StandardScaler()),
                                           ("knn", KNeighborsClassifier(n_neighbors=15, weights="distance"))]),
         "KNN (k=1)": Pipeline([("scaler", StandardScaler()), ("knn", KNeighborsClassifier(n_neighbors=1))]),
@@ -570,7 +567,7 @@ def _evaluacion_reales():
     cortes = [-np.inf, 18.5, 25, 27.5, 30, 35, 40, np.inf]
     clase_oms = pd.cut(imc, cortes, right=False, labels=CLASS_ORDER).astype(str)
 
-    rf = RandomForestClassifier(n_estimators=300, min_samples_leaf=3, class_weight="balanced",
+    rf = RandomForestClassifier(n_estimators=300, min_samples_leaf=3,
                                 random_state=RANDOM_STATE, n_jobs=-1).fit(X_rB, y_r.map(GRUPOS_3))
     return dict(
         n_reales=int(r.sum()), n_total=len(X), n_test_reales=int(m_te.sum()),
@@ -601,23 +598,21 @@ def paso_8_filas_reales():
 
     tabla(B3, "Sólo filas reales · variante B · 3 clases agrupadas (CV 3×10)")
     tabla(ev["importancias"].head(8).rename("importancia"),
-          "Importancia de atributos (RF con pesos por clase, 3 clases, filas reales)")
+          "Importancia de atributos (Random Forest, 3 clases, filas reales)")
 
     tabla(A7, "Referencia: sólo filas reales · variante A (con Weight/Height) · 7 clases")
 
-    # --- Figura: macro-F1 y balanced accuracy vs línea base, 7 y 3 clases ---
+    # --- Figura: macro-F1 de cada modelo (la línea base es la primera barra), 7 y 3 clases ---
     fig, axes = plt.subplots(1, 2, figsize=(15, 5), sharey=True)
-    for ax, t, azar, titulo in [(axes[0], B7, 1 / 7, "7 clases"), (axes[1], B3, 1 / 3, "3 clases agrupadas")]:
+    for ax, t, titulo in [(axes[0], B7, "7 clases"), (axes[1], B3, "3 clases agrupadas")]:
         x = np.arange(len(t))
-        ax.bar(x - 0.2, t["balanced_accuracy"], 0.4, label="balanced accuracy", color="#4c78a8")
-        ax.bar(x + 0.2, t["f1_macro"], 0.4, yerr=t["f1_macro_std"], capsize=3,
+        ax.bar(x, t["f1_macro"], 0.6, yerr=t["f1_macro_std"], capsize=3,
                label="macro-F1 (± desv. entre folds)", color="#f58518")
-        ax.axhline(azar, ls="--", color="gray", lw=1.2, label=f"azar en balanced acc. (1/{round(1 / azar)})")
         ax.set_xticks(x, [n.replace(" (clase mayoritaria)", "") for n in t.index], rotation=20, ha="right")
         ax.set_title(f"Filas reales, sin Weight/Height · {titulo}")
         ax.grid(axis="x", visible=False)
         ax.grid(axis="y", alpha=0.3)
-    axes[0].set_ylabel("métrica (CV 3 folds × 10 repeticiones)")
+    axes[0].set_ylabel("macro-F1 (CV 3 folds × 10 repeticiones)")
     axes[0].set_ylim(0, 0.6)
     for ax in axes:
         ax.legend(loc="upper right", fontsize=9)

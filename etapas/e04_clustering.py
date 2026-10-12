@@ -20,10 +20,10 @@ Protocolo:
 Pasos:
   1    Datos escalados                 3.4  PCA 2D: clusters vs clases
   2    Barrido de K (tabla)            4    Variantes con clase (ordinal / one-hot)
-  2.1  Método del codo                 4.1  Elección de K con clase ordinal (5 métodos)
+  2.1  Método del codo                 4.1  Elección de K con clase (ord. y one-hot)
   2.2  Silueta, CH y DB                4.2  K=7 con clase: contingencia + matrices mapeadas
   2.3  Estadístico gap                 4.3  Tabla comparativa sin/con clase
-  2.4  Comparación de los 5 métodos    4.4  PCA 2D con clase ordinal
+  2.4  Comparación de los 5 métodos    4.4  PCA 2D con clase (ord. y one-hot)
   3    K=7 vs clases: métricas
   3.1  Tabla de contingencia           5    Variante sólo numéricas
   3.2  Matriz mapeada (húngaro)
@@ -139,9 +139,10 @@ def _barrido(X_):
 
 
 def barrido(variante="base"):
-    """'base' = 20 features, 'ord' = + clase ordinal, 'num' = sólo 8 numéricas. Cacheado."""
+    """'base' = 20 features, 'ord' = + clase ordinal, 'oh' = + clase one-hot, 'num' = sólo 8 numéricas. Cacheado."""
     X_ = {"base": lambda: datos()["X_scaled"],
           "ord": lambda: con_clase()["X_ord_scaled"],
+          "oh": lambda: con_clase()["X_oh_scaled"],
           "num": lambda: solo_numericas()["X_num"]}[variante]()
     return cache.obtener(f"clu_barrido_{variante}", lambda: _barrido(X_))
 
@@ -389,36 +390,38 @@ def paso_4_con_clase():
     print(f"X_con_ord: {c['X_ord'].shape} | X_con_oh: {c['X_oh'].shape}")
 
 
-@etapa.paso("4.1", "Elección de K para la variante con clase ordinal (5 métodos)", figuras=1,
+@etapa.paso("4.1", "Elección de K con la clase: ordinal y one-hot (5 métodos)", figuras=2,
             parametros=("K_RANGE", "con_clase"))
 def paso_4_1_k_con_clase():
-    b = barrido("ord")
-    m, r, gap_df, k_gap = b["metrics"], b["resumen"], b["gap_df"], b["k_gap"]
-    fig, axes = plt.subplots(2, 3, figsize=(18, 9))
-    paneles = [
-        (axes[0, 0], "inercia", r["Codo (inercia)"], "codo", "1. Método del codo", "Inercia (WCSS)"),
-        (axes[0, 1], "silhouette", r["Silueta (max)"], "max", "2. Coeficiente de silueta", "Silueta"),
-        (axes[0, 2], "calinski_harabasz", r["Calinski-Harabasz (max)"], "max", "3. Calinski-Harabasz", "Calinski-Harabasz"),
-        (axes[1, 0], "davies_bouldin", r["Davies-Bouldin (min)"], "min", "4. Davies-Bouldin", "Davies-Bouldin"),
-    ]
-    for ax, col, best, sense, titulo_ax, ylabel in paneles:
-        ax.plot(m.index, m[col], marker="o", color="steelblue")
-        ax.axvline(best, c="r", ls="--", label=f"{sense}: K={best}")
+    for variante, nombre in (("ord", "ordinal"), ("oh", "one-hot")):
+        b = barrido(variante)
+        m, r, gap_df, k_gap = b["metrics"], b["resumen"], b["gap_df"], b["k_gap"]
+        fig, axes = plt.subplots(2, 3, figsize=(18, 9))
+        paneles = [
+            (axes[0, 0], "inercia", r["Codo (inercia)"], "codo", "1. Método del codo", "Inercia (WCSS)"),
+            (axes[0, 1], "silhouette", r["Silueta (max)"], "max", "2. Coeficiente de silueta", "Silueta"),
+            (axes[0, 2], "calinski_harabasz", r["Calinski-Harabasz (max)"], "max", "3. Calinski-Harabasz", "Calinski-Harabasz"),
+            (axes[1, 0], "davies_bouldin", r["Davies-Bouldin (min)"], "min", "4. Davies-Bouldin", "Davies-Bouldin"),
+        ]
+        for ax, col, best, sense, titulo_ax, ylabel in paneles:
+            ax.plot(m.index, m[col], marker="o", color="steelblue")
+            ax.axvline(best, c="r", ls="--", label=f"{sense}: K={best}")
+            ax.set_xlabel("K")
+            ax.set_ylabel(ylabel)
+            ax.set_title(titulo_ax)
+            ax.legend()
+        ax = axes[1, 1]
+        ax.errorbar(gap_df.index, gap_df["gap"], yerr=gap_df["s_k"], marker="o", capsize=3, color="steelblue")
+        if k_gap is not None:
+            ax.axvline(k_gap, c="r", ls="--", label=f"gap: K={k_gap}")
+            ax.legend()
         ax.set_xlabel("K")
-        ax.set_ylabel(ylabel)
-        ax.set_title(titulo_ax)
-        ax.legend()
-    ax = axes[1, 1]
-    ax.errorbar(gap_df.index, gap_df["gap"], yerr=gap_df["s_k"], marker="o", capsize=3, color="steelblue")
-    if k_gap is not None:
-        ax.axvline(k_gap, c="r", ls="--", label=f"gap: K={k_gap}")
-        ax.legend()
-    ax.set_xlabel("K")
-    ax.set_ylabel("gap(K)")
-    ax.set_title("5. Estadístico gap")
-    axes[1, 2].axis("off")
-    etapa.figura(fig, "4.1_cinco_metodos_con_clase_ordinal")
-    tabla(r.rename("K óptimo (con clase ordinal)"), "K óptimo por método (con clase ordinal)")
+        ax.set_ylabel("gap(K)")
+        ax.set_title("5. Estadístico gap")
+        axes[1, 2].axis("off")
+        fig.suptitle(f"Elección de K con clase {nombre}")
+        etapa.figura(fig, f"4.1_cinco_metodos_con_clase_{nombre.replace('-', '')}")
+        tabla(r.rename(f"K óptimo (con clase {nombre})"), f"K óptimo por método (con clase {nombre})")
 
 
 @etapa.paso("4.2", "K=7 con clase: tablas de contingencia crudas y matrices mapeadas", figuras=2,
@@ -454,12 +457,14 @@ def paso_4_3_tabla_comparativa():
     tabla(df_comp, "Comparativa de clustering (K=7)")
 
 
-@etapa.paso("4.4", "Visualización 2D (PCA) para la variante con clase ordinal", figuras=1,
+@etapa.paso("4.4", "Visualización 2D (PCA) con la clase: ordinal y one-hot", figuras=2,
             parametros=("con_clase", "_pca_2d"))
 def paso_4_4_pca_con_clase():
     c = con_clase()
-    _pca_2d(c["X_ord_scaled"], c["km7_ord"].labels_, "Clusters K-Means K=7 (con clase ordinal)",
-            "4.4_pca_2d_con_clase_ordinal")
+    for nombre, sufijo in (("ordinal", "ord"), ("one-hot", "oh")):
+        _pca_2d(c[f"X_{sufijo}_scaled"], c[f"km7_{sufijo}"].labels_,
+                f"Clusters K-Means K=7 (con clase {nombre})",
+                f"4.4_pca_2d_con_clase_{nombre.replace('-', '')}")
 
 
 # ----------------------------------------------------------------------------

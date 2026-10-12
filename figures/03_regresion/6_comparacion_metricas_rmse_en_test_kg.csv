@@ -1,0 +1,5 @@
+categoria,test_RMSE
+Baseline (media),25.9126
+Árbol de regresión,10.4655
+Random Forest,8.2468
+KNN,9.9085

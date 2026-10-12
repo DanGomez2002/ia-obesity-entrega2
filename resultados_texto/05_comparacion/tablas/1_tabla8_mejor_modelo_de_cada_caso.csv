@@ -1,0 +1,8 @@
+Caso,Mejor modelo,Métrica principal,Valor,Otra métrica
+Clasificación A (todas),Random Forest,macro-F1 test,0.9558,accuracy 0.9569
+Clasificación B (sin W/H),Random Forest,macro-F1 test,0.8528,accuracy 0.8565
+Clasificación B + ruido 20 %,Random Forest,macro-F1 test,0.7801,accuracy 0.7895
+Clasificación B · filas reales · 7 clases,KNN (k=1),macro-F1 CV 3×10,0.1942,línea base 0.1042
+Clasificación B · filas reales · 3 clases,KNN (k=1),macro-F1 CV 3×10,0.3957,línea base 0.2616
+Regresión de Weight,Random Forest,RMSE test (kg),8.2468,R² 0.8987
+Clustering K=7 (sin la clase),K-Means · Sólo numérica…,ARI vs clases,0.1564,pureza 0.3824

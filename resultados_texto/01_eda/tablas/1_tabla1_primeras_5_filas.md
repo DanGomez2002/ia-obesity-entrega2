@@ -1,0 +1,10 @@
+### Primeras 5 filas
+
+|    | Gender   |   Age |   Height |   Weight | family_history_with_overweight   | FAVC   |   FCVC |   NCP | CAEC      | SMOKE   |   CH2O | SCC   |   FAF |   TUE | CALC       | MTRANS                | NObeyesdad          |
+|---:|:---------|------:|---------:|---------:|:---------------------------------|:-------|-------:|------:|:----------|:--------|-------:|:------|------:|------:|:-----------|:----------------------|:--------------------|
+|  0 | Female   |    21 |     1.62 |     64   | yes                              | no     |      2 |     3 | Sometimes | no      |      2 | no    |     0 |     1 | no         | Public_Transportation | Normal_Weight       |
+|  1 | Female   |    21 |     1.52 |     56   | yes                              | no     |      3 |     3 | Sometimes | yes     |      3 | yes   |     3 |     0 | Sometimes  | Public_Transportation | Normal_Weight       |
+|  2 | Male     |    23 |     1.8  |     77   | yes                              | no     |      2 |     3 | Sometimes | no      |      2 | no    |     2 |     1 | Frequently | Public_Transportation | Normal_Weight       |
+|  3 | Male     |    27 |     1.8  |     87   | no                               | no     |      3 |     3 | Sometimes | no      |      2 | no    |     2 |     0 | Frequently | Walking               | Overweight_Level_I  |
+|  4 | Male     |    22 |     1.78 |     89.8 | no                               | no     |      2 |     1 | Sometimes | no      |      2 | no    |     0 |     0 | Sometimes  | Public_Transportation | Overweight_Level_II |
+

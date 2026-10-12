@@ -1,0 +1,10 @@
+### Clasificación B sólo con filas reales (sin SMOTE), 3 clases (CV 3×10)
+
+|                                |   accuracy |   f1_macro |   f1_macro_std |
+|:-------------------------------|-----------:|-----------:|---------------:|
+| Línea base (clase mayoritaria) |     0.6456 |     0.2616 |         0.0003 |
+| Árbol (depth 4, leaf 5)        |     0.631  |     0.3719 |         0.0374 |
+| Random Forest                  |     0.6483 |     0.3824 |         0.0345 |
+| KNN (k=15, distance)           |     0.6578 |     0.335  |         0.0305 |
+| KNN (k=1)                      |     0.575  |     0.3957 |         0.028  |
+

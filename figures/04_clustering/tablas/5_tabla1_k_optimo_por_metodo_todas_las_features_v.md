@@ -1,0 +1,10 @@
+### K óptimo por método: todas las features vs sólo numéricas
+
+|                         |   K óptimo (todas) | K óptimo (sólo numéricas)   |
+|:------------------------|-------------------:|:----------------------------|
+| Codo (inercia)          |                  7 | 6                           |
+| Silueta (max)           |                  2 | 12                          |
+| Calinski-Harabasz (max) |                  2 | 2                           |
+| Davies-Bouldin (min)    |                  9 | 11                          |
+| Gap statistic           |                  2 | —                           |
+

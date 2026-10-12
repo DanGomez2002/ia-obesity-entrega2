@@ -1,0 +1,5 @@
+categoria,valor
+Baseline (media),-0.0001
+Árbol,0.8369
+Random Forest,0.8987
+KNN,0.8538

@@ -1,0 +1,12 @@
+### classification_report por clase — Random Forest (B)
+
+|                     |   precision |   recall |   f1-score |
+|:--------------------|------------:|---------:|-----------:|
+| Insufficient_Weight |       0.893 |    0.943 |      0.917 |
+| Normal_Weight       |       0.667 |    0.772 |      0.715 |
+| Overweight_Level_I  |       0.82  |    0.745 |      0.781 |
+| Overweight_Level_II |       0.87  |    0.69  |      0.769 |
+| Obesity_Type_I      |       0.849 |    0.886 |      0.867 |
+| Obesity_Type_II     |       0.905 |    0.95  |      0.927 |
+| Obesity_Type_III    |       1     |    0.985 |      0.992 |
+

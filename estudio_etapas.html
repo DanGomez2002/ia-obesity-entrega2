@@ -151,6 +151,7 @@ tbody tr:hover td{background:color-mix(in srgb,var(--accent-soft) 45%,transparen
 .tfilter input{flex:1;max-width:320px}
 input[type="search"],input[type="text"]{font:inherit;font-size:14.5px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 12px;width:100%}
 .intro{gap:12px}
+.aparte{display:flex;flex-direction:column;gap:18px;margin-top:14px;padding-top:26px;border-top:2px dashed var(--line);scroll-margin-top:24px}
 details.texto-plano summary{cursor:pointer;color:var(--muted);font-size:14px}
 details.texto-plano pre{margin-top:10px}
 
@@ -445,11 +446,11 @@ train → evaluar <strong>una vez</strong> en test. KNN dentro de <code>Pipeline
 </tr>
 <tr>
 <td><code>_modelos_reales()</code></td>
-<td>línea base, árbol, RF, RF con pesos por clase, KNN k=15 y k=1 (paso 8)</td>
+<td>línea base, árbol, RF, KNN k=15 y k=1 (paso 8)</td>
 </tr>
 <tr>
 <td><code>_cv_reales(X, y)</code></td>
-<td>accuracy, balanced accuracy y macro-F1 con CV 3×10 (paso 8)</td>
+<td>accuracy y macro-F1 con CV 3×10 (paso 8)</td>
 </tr>
 <tr>
 <td><code>evaluacion_reales()</code></td>
@@ -1017,8 +1018,8 @@ Obesity_II 11, <strong>Obesity_III 3</strong>.</p>
 </li>
 <li>
 <p><strong>Protocolo:</strong> variante B sobre las 491 filas reales, CV estratificada 3 folds × 10
-repeticiones, con <strong>línea base</strong> (siempre Normal_Weight) y tres métricas: accuracy, balanced
-accuracy y macro-F1 (ver 6.10). Hiperparámetros fijos (sin GridSearch: con tan pocas filas haría
+repeticiones, con <strong>línea base</strong> (siempre Normal_Weight) y dos métricas: accuracy
+y macro-F1 (ver 6.10). Hiperparámetros fijos (sin GridSearch: con tan pocas filas haría
 falta CV anidada).</p>
 </li>
 <li>
@@ -1028,7 +1029,6 @@ falta CV anidada).</p>
 <tr>
 <th>Modelo</th>
 <th>Accuracy</th>
-<th>Balanced acc.</th>
 <th>Macro-F1</th>
 </tr>
 </thead>
@@ -1036,44 +1036,32 @@ falta CV anidada).</p>
 <tr>
 <td><strong>Línea base</strong></td>
 <td><strong>0.574</strong></td>
-<td>0.143</td>
 <td>0.104</td>
 </tr>
 <tr>
 <td>Árbol (depth 4, leaf 5)</td>
 <td>0.555</td>
-<td>0.171</td>
 <td>0.156</td>
 </tr>
 <tr>
 <td>Random Forest</td>
 <td>0.576</td>
-<td>0.182</td>
 <td>0.174</td>
-</tr>
-<tr>
-<td>RF con pesos por clase</td>
-<td>0.297</td>
-<td>0.196</td>
-<td>0.171</td>
 </tr>
 <tr>
 <td>KNN (k=15, distance)</td>
 <td>0.590</td>
-<td>0.169</td>
 <td>0.152</td>
 </tr>
 <tr>
 <td>KNN (k=1)</td>
 <td>0.463</td>
-<td>0.194</td>
 <td><strong>0.194</strong></td>
 </tr>
 </tbody>
 </table></div>
 <p><strong>Lectura:</strong> ningún modelo supera de forma útil a la línea base. Los que maximizan accuracy lo
-hacen prediciendo casi siempre Normal_Weight; al ponderar por clase la accuracy se desploma pero
-el acierto se reparte mejor. Con datos reales, los hábitos solos casi no distinguen 7 niveles.</p>
+hacen prediciendo casi siempre Normal_Weight; KNN (k=1) baja la accuracy pero reparte mejor el acierto entre clases. Con datos reales, los hábitos solos casi no distinguen 7 niveles.</p>
 </li>
 <li>
 <p><strong>3 clases agrupadas</strong> (Bajo/Normal 317, Sobrepeso 113, Obesidad 61):</p>
@@ -1082,7 +1070,6 @@ el acierto se reparte mejor. Con datos reales, los hábitos solos casi no distin
 <tr>
 <th>Modelo</th>
 <th>Accuracy</th>
-<th>Balanced acc.</th>
 <th>Macro-F1</th>
 </tr>
 </thead>
@@ -1090,31 +1077,22 @@ el acierto se reparte mejor. Con datos reales, los hábitos solos casi no distin
 <tr>
 <td>Línea base</td>
 <td>0.646</td>
-<td>0.333</td>
 <td>0.262</td>
 </tr>
 <tr>
 <td>Random Forest</td>
 <td>0.648</td>
-<td>0.394</td>
 <td>0.382</td>
 </tr>
 <tr>
-<td><strong>RF con pesos por clase</strong></td>
-<td>0.549</td>
-<td><strong>0.435</strong></td>
-<td><strong>0.424</strong></td>
-</tr>
-<tr>
-<td>KNN (k=1)</td>
+<td><strong>KNN (k=1)</strong></td>
 <td>0.575</td>
-<td>0.396</td>
-<td>0.396</td>
+<td><strong>0.396</strong></td>
 </tr>
 </tbody>
 </table></div>
-<p>Aquí sí hay una <strong>señal modesta pero real</strong>. Importancias (RF con pesos, 3 clases): <strong>Age 0.221</strong>,
-family_history 0.093, FAF 0.084, CALC 0.074, CH2O 0.073.</p>
+<p>Aquí sí hay una <strong>señal modesta pero real</strong>. Importancias (Random Forest, 3 clases): <strong>Age 0.272</strong>,
+FAF 0.089, CH2O 0.074, CALC 0.069, family_history 0.066.</p>
 </li>
 <li>
 <p><strong>Referencia con Weight y Height (A, 7 clases, filas reales):</strong> el mejor llega a accuracy
@@ -1124,11 +1102,10 @@ frontera Weight/Height² con cortes paralelos a los ejes; en el dataset completo
 miles de puntos para hacerlo.</p>
 </li>
 <li>
-<p><strong>Gráfica <code>8_filas_reales_sin_WH.png</code>:</strong> dos paneles (7 clases | 3 clases). Por modelo, barra
-azul = balanced accuracy y naranja = macro-F1 (con barra de error = desviación entre folds);
-línea gris discontinua = azar en balanced accuracy (1/7 y 1/3). Se lee comparando cada modelo
-con la &quot;Línea base&quot;: en 7 clases todas las barras quedan apenas por encima; en 3 clases el RF con
-pesos se separa claramente.</p>
+<p><strong>Gráfica <code>8_filas_reales_sin_WH.png</code>:</strong> dos paneles (7 clases | 3 clases). Por modelo, una barra
+naranja = macro-F1 (con barra de error = desviación entre folds). Se lee comparando cada modelo
+con la &quot;Línea base&quot; (primera barra): en 7 clases todas las barras quedan apenas por encima; en 3 clases
+KNN (k=1) y el Random Forest se separan algo.</p>
 </li>
 <li>
 <p><strong>Conclusión del paso:</strong> el rendimiento alto del proyecto se apoya en dos artificios, la fuga
@@ -1137,12 +1114,12 @@ del IMC (A) y SMOTE (B). Sin ninguno de los dos, predecir 7 niveles no supera a 
 identificación heurística, pocas filas (3 de Obesity_III), hiperparámetros sin ajustar.</p>
 </li>
 </ul>
-</div><details class="tabfigs"><summary>Tablas de este paso como imagen <span class="count">6</span></summary><div class="figs mini"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/02_clasificacion/tablas/8_tabla1_modelos_del_proyecto_accuracy_en_las_fil.png" data-cap="8 · modelos del proyecto accuracy en las fil" data-group="etapa02-p8-t" aria-label="Ampliar 8 · modelos del proyecto accuracy en las fil"><img src="figures/02_clasificacion/tablas/8_tabla1_modelos_del_proyecto_accuracy_en_las_fil.png" alt="8 · modelos del proyecto accuracy en las fil" loading="lazy"></button><figcaption>8 · modelos del proyecto accuracy en las fil</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/02_clasificacion/tablas/8_tabla2_filas_reales_por_clase_distribucion_de_l.png" data-cap="8 · filas reales por clase distribucion de l" data-group="etapa02-p8-t" aria-label="Ampliar 8 · filas reales por clase distribucion de l"><img src="figures/02_clasificacion/tablas/8_tabla2_filas_reales_por_clase_distribucion_de_l.png" alt="8 · filas reales por clase distribucion de l" loading="lazy"></button><figcaption>8 · filas reales por clase distribucion de l</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/02_clasificacion/tablas/8_tabla3_solo_filas_reales_variante_b_7_clases_cv.png" data-cap="8 · solo filas reales variante b 7 clases cv" data-group="etapa02-p8-t" aria-label="Ampliar 8 · solo filas reales variante b 7 clases cv"><img src="figures/02_clasificacion/tablas/8_tabla3_solo_filas_reales_variante_b_7_clases_cv.png" alt="8 · solo filas reales variante b 7 clases cv" loading="lazy"></button><figcaption>8 · solo filas reales variante b 7 clases cv</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/02_clasificacion/tablas/8_tabla4_solo_filas_reales_variante_b_3_clases_ag.png" data-cap="8 · solo filas reales variante b 3 clases ag" data-group="etapa02-p8-t" aria-label="Ampliar 8 · solo filas reales variante b 3 clases ag"><img src="figures/02_clasificacion/tablas/8_tabla4_solo_filas_reales_variante_b_3_clases_ag.png" alt="8 · solo filas reales variante b 3 clases ag" loading="lazy"></button><figcaption>8 · solo filas reales variante b 3 clases ag</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/02_clasificacion/tablas/8_tabla5_importancia_de_atributos_rf_con_pesos_po.png" data-cap="8 · importancia de atributos rf con pesos po" data-group="etapa02-p8-t" aria-label="Ampliar 8 · importancia de atributos rf con pesos po"><img src="figures/02_clasificacion/tablas/8_tabla5_importancia_de_atributos_rf_con_pesos_po.png" alt="8 · importancia de atributos rf con pesos po" loading="lazy"></button><figcaption>8 · importancia de atributos rf con pesos po</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/02_clasificacion/tablas/8_tabla6_referencia_solo_filas_reales_variante_a.png" data-cap="8 · referencia solo filas reales variante a" data-group="etapa02-p8-t" aria-label="Ampliar 8 · referencia solo filas reales variante a"><img src="figures/02_clasificacion/tablas/8_tabla6_referencia_solo_filas_reales_variante_a.png" alt="8 · referencia solo filas reales variante a" loading="lazy"></button><figcaption>8 · referencia solo filas reales variante a</figcaption></figure></div></details></div></article><footer class="sec-foot"><button type="button" class="done-btn" data-sec="etapa02" aria-pressed="false"><span class="tick" aria-hidden="true"></span><span class="lbl">Marcar sección como estudiada</span></button></footer></section><section class="sec" id="etapa03" data-sec="etapa03"><header class="sec-head"><p class="eyebrow">Etapas</p><h2>Etapa 03 — Regresión de Weight, paso a paso</h2></header><div class="prose intro"><p><strong>Archivo:</strong> <code>etapas/e03_regresion.py</code>. <strong>Figuras:</strong> <code>figures/03_regresion/</code>.</p>
+</div><details class="tabfigs"><summary>Tablas de este paso como imagen <span class="count">6</span></summary><div class="figs mini"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/02_clasificacion/tablas/8_tabla1_modelos_del_proyecto_accuracy_en_las_fil.png" data-cap="8 · modelos del proyecto accuracy en las fil" data-group="etapa02-p8-t" aria-label="Ampliar 8 · modelos del proyecto accuracy en las fil"><img src="figures/02_clasificacion/tablas/8_tabla1_modelos_del_proyecto_accuracy_en_las_fil.png" alt="8 · modelos del proyecto accuracy en las fil" loading="lazy"></button><figcaption>8 · modelos del proyecto accuracy en las fil</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/02_clasificacion/tablas/8_tabla2_filas_reales_por_clase_distribucion_de_l.png" data-cap="8 · filas reales por clase distribucion de l" data-group="etapa02-p8-t" aria-label="Ampliar 8 · filas reales por clase distribucion de l"><img src="figures/02_clasificacion/tablas/8_tabla2_filas_reales_por_clase_distribucion_de_l.png" alt="8 · filas reales por clase distribucion de l" loading="lazy"></button><figcaption>8 · filas reales por clase distribucion de l</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/02_clasificacion/tablas/8_tabla3_solo_filas_reales_variante_b_7_clases_cv.png" data-cap="8 · solo filas reales variante b 7 clases cv" data-group="etapa02-p8-t" aria-label="Ampliar 8 · solo filas reales variante b 7 clases cv"><img src="figures/02_clasificacion/tablas/8_tabla3_solo_filas_reales_variante_b_7_clases_cv.png" alt="8 · solo filas reales variante b 7 clases cv" loading="lazy"></button><figcaption>8 · solo filas reales variante b 7 clases cv</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/02_clasificacion/tablas/8_tabla4_solo_filas_reales_variante_b_3_clases_ag.png" data-cap="8 · solo filas reales variante b 3 clases ag" data-group="etapa02-p8-t" aria-label="Ampliar 8 · solo filas reales variante b 3 clases ag"><img src="figures/02_clasificacion/tablas/8_tabla4_solo_filas_reales_variante_b_3_clases_ag.png" alt="8 · solo filas reales variante b 3 clases ag" loading="lazy"></button><figcaption>8 · solo filas reales variante b 3 clases ag</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/02_clasificacion/tablas/8_tabla5_importancia_de_atributos_random_forest_3.png" data-cap="8 · importancia de atributos random forest 3" data-group="etapa02-p8-t" aria-label="Ampliar 8 · importancia de atributos random forest 3"><img src="figures/02_clasificacion/tablas/8_tabla5_importancia_de_atributos_random_forest_3.png" alt="8 · importancia de atributos random forest 3" loading="lazy"></button><figcaption>8 · importancia de atributos random forest 3</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/02_clasificacion/tablas/8_tabla6_referencia_solo_filas_reales_variante_a.png" data-cap="8 · referencia solo filas reales variante a" data-group="etapa02-p8-t" aria-label="Ampliar 8 · referencia solo filas reales variante a"><img src="figures/02_clasificacion/tablas/8_tabla6_referencia_solo_filas_reales_variante_a.png" alt="8 · referencia solo filas reales variante a" loading="lazy"></button><figcaption>8 · referencia solo filas reales variante a</figcaption></figure></div></details></div></article><footer class="sec-foot"><button type="button" class="done-btn" data-sec="etapa02" aria-pressed="false"><span class="tick" aria-hidden="true"></span><span class="lbl">Marcar sección como estudiada</span></button></footer></section><section class="sec" id="etapa03" data-sec="etapa03"><header class="sec-head"><p class="eyebrow">Etapas</p><h2>Etapa 03 — Regresión de Weight, paso a paso</h2></header><div class="prose intro"><p><strong>Archivo:</strong> <code>etapas/e03_regresion.py</code>. <strong>Figuras:</strong> <code>figures/03_regresion/</code>.</p>
 <p><strong>Protocolo:</strong> <code>reg.csv</code> (19 features, <strong>sin NObeyesdad</strong>; Height sí se mantiene porque es una
 medida física independiente, no se deriva del peso) → split 80/20 <strong>estratificado por deciles
 de Weight</strong> → GridSearchCV con <code>KFold(5)</code> y <code>scoring=&quot;neg_root_mean_squared_error&quot;</code> → test.
 Además se compara con un <strong>baseline</strong> que predice la media.</p>
-</div><nav class="chips" aria-label="Pasos de la etapa"><span class="chips-label">Ir al paso</span><a class="chip" href="#etapa03-p1"><b>1</b> Datos y split</a><a class="chip" href="#etapa03-p2"><b>2</b> Modelos, grillas y tabla de resultados</a><a class="chip" href="#etapa03-p2-1"><b>2.1</b> Curva del mejor K de KNN (regresión)</a><a class="chip" href="#etapa03-p2-2"><b>2.2</b> ¿Cuántos árboles? (regresión)</a><a class="chip" href="#etapa03-p3"><b>3</b> Tres árboles de regresión (prepoda)</a><a class="chip" href="#etapa03-p4"><b>4</b> Predicho vs real (modelos principal</a><a class="chip" href="#etapa03-p5"><b>5</b> Importancia de features (RF de regresión)</a><a class="chip" href="#etapa03-p6"><b>6</b> Comparación de métricas y R² ajustado</a><a class="chip" href="#etapa03-p7"><b>7</b> Conclusiones de regresión (texto)</a></nav><div class="steps-tools"><button type="button" class="btn-ghost js-expand-all">Contraer todos los pasos</button></div><article class="step" id="etapa03-p1"><header class="step-head"><span class="step-id">1</span><h3>Datos y split</h3><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e03_regresion.py#L151" target="_blank" rel="noopener" title="Abre e03_regresion.py en la línea 151. Ejecutar solo este paso: python etapas/e03_regresion.py --paso 1">Ver código<code>e03_regresion.py:151</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="prose"><ul>
+</div><nav class="chips" aria-label="Pasos de la etapa"><span class="chips-label">Ir al paso</span><a class="chip" href="#etapa03-p1"><b>1</b> Datos y split</a><a class="chip" href="#etapa03-p2"><b>2</b> Modelos, grillas y tabla de resultados</a><a class="chip" href="#etapa03-p2-1"><b>2.1</b> Curva del mejor K de KNN (regresión)</a><a class="chip" href="#etapa03-p2-2"><b>2.2</b> ¿Cuántos árboles? (regresión)</a><a class="chip" href="#etapa03-p3"><b>3</b> Tres árboles de regresión (prepoda)</a><a class="chip" href="#etapa03-p4"><b>4</b> Predicho vs real (modelos principal</a><a class="chip" href="#etapa03-p5"><b>5</b> Importancia de features (RF de regresión)</a><a class="chip" href="#etapa03-p6"><b>6</b> Comparación de métricas y R² ajustado</a><a class="chip" href="#etapa03-p7"><b>7</b> Conclusiones de regresión (texto)</a><a class="chip" href="#etapa03-p8"><b>8</b> Variante sin Height</a><a class="chip" href="#etapa03-p9"><b>9</b> Sólo filas reales (sin SMOTE)</a><a class="chip" href="#etapa03-p10"><b>10</b> Robustez ante ruido (jittering)</a></nav><div class="steps-tools"><button type="button" class="btn-ghost js-expand-all">Contraer todos los pasos</button></div><article class="step" id="etapa03-p1"><header class="step-head"><span class="step-id">1</span><h3>Datos y split</h3><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e03_regresion.py#L151" target="_blank" rel="noopener" title="Abre e03_regresion.py en la línea 151. Ejecutar solo este paso: python etapas/e03_regresion.py --paso 1">Ver código<code>e03_regresion.py:151</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="prose"><ul>
 <li>train (1669, 19), test (418, 19), <code>n_features = 19</code>. Se comprueba que NObeyesdad <strong>no</strong> está.</li>
 <li><code>strata = pd.qcut(y, q=10, labels=False)</code> divide el peso en 10 grupos de igual tamaño
 (deciles) y se pasa como <code>stratify=strata</code>: train y test tienen la misma distribución de
@@ -1404,10 +1381,15 @@ del peso (en los datos, casi todas las personas con obesidad tienen antecedente 
 </ul>
 </li>
 </ul>
-</div><details class="tabfigs"><summary>Tablas de este paso como imagen <span class="count">1</span></summary><div class="figs mini"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/3_tabla1_resumen_de_los_tres_arboles.png" data-cap="3 · resumen de los tres arboles" data-group="etapa03-p3-t" aria-label="Ampliar 3 · resumen de los tres arboles"><img src="figures/03_regresion/tablas/3_tabla1_resumen_de_los_tres_arboles.png" alt="3 · resumen de los tres arboles" loading="lazy"></button><figcaption>3 · resumen de los tres arboles</figcaption></figure></div></details></div></article><article class="step" id="etapa03-p4"><header class="step-head"><span class="step-id">4</span><h3>Predicho vs real (modelos principales)</h3><span class="badge">1 figura</span><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e03_regresion.py#L279" target="_blank" rel="noopener" title="Abre e03_regresion.py en la línea 279. Ejecutar solo este paso: python etapas/e03_regresion.py --paso 4">Ver código<code>e03_regresion.py:279</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="figs"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/4_pred_vs_real_modelos.png" data-cap="4 · pred vs real modelos" data-group="etapa03-p4" aria-label="Ampliar 4 · pred vs real modelos"><img src="figures/03_regresion/4_pred_vs_real_modelos.png" alt="4 · pred vs real modelos" loading="lazy"></button><figcaption>4 · pred vs real modelos</figcaption></figure></div><div class="prose"><ul>
+</div><details class="tabfigs"><summary>Tablas de este paso como imagen <span class="count">1</span></summary><div class="figs mini"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/3_tabla1_resumen_de_los_tres_arboles.png" data-cap="3 · resumen de los tres arboles" data-group="etapa03-p3-t" aria-label="Ampliar 3 · resumen de los tres arboles"><img src="figures/03_regresion/tablas/3_tabla1_resumen_de_los_tres_arboles.png" alt="3 · resumen de los tres arboles" loading="lazy"></button><figcaption>3 · resumen de los tres arboles</figcaption></figure></div></details></div></article><article class="step" id="etapa03-p4"><header class="step-head"><span class="step-id">4</span><h3>Predicho vs real y residuos (modelos principales)</h3><span class="badge">3 figuras</span><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e03_regresion.py#L279" target="_blank" rel="noopener" title="Abre e03_regresion.py en la línea 279. Ejecutar solo este paso: python etapas/e03_regresion.py --paso 4">Ver código<code>e03_regresion.py:279</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="figs"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/4_pred_vs_real_modelos.png" data-cap="4 · pred vs real modelos" data-group="etapa03-p4" aria-label="Ampliar 4 · pred vs real modelos"><img src="figures/03_regresion/4_pred_vs_real_modelos.png" alt="4 · pred vs real modelos" loading="lazy"></button><figcaption>4 · pred vs real modelos</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/4_residuos_modelos.png" data-cap="4 · residuos modelos" data-group="etapa03-p4" aria-label="Ampliar 4 · residuos modelos"><img src="figures/03_regresion/4_residuos_modelos.png" alt="4 · residuos modelos" loading="lazy"></button><figcaption>4 · residuos modelos</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/4_residuos_vs_predicho.png" data-cap="4 · residuos vs predicho" data-group="etapa03-p4" aria-label="Ampliar 4 · residuos vs predicho"><img src="figures/03_regresion/4_residuos_vs_predicho.png" alt="4 · residuos vs predicho" loading="lazy"></button><figcaption>4 · residuos vs predicho</figcaption></figure></div><div class="prose"><ul>
 <li><strong>Gráfica <code>4_pred_vs_real_modelos.png</code>:</strong> árbol (GridSearch), RF y KNN, misma escala. RF se
 pega a la diagonal en todo el rango; el árbol muestra escalones; KNN en medio. En los tres la
 dispersión crece en los pesos altos (hay menos personas ahí).</li>
+<li><strong>Gráfica <code>4_residuos_modelos.png</code>:</strong> histograma del residuo (real − predicho) por modelo; todos
+quedan centrados en 0, con colas hacia ambos lados.</li>
+<li><strong>Gráfica <code>4_residuos_vs_predicho.png</code>:</strong> residuo (eje y) contra el peso predicho (eje x), con la línea
+y = 0. Una nube plana y sin forma indica un modelo sin sesgo sistemático. Aquí el RF es la más compacta; el
+árbol y KNN muestran más puntos lejos de 0 (KNN con errores de hasta ±50 kg en algunos casos aislados).</li>
 </ul>
 </div></div></article><article class="step" id="etapa03-p5"><header class="step-head"><span class="step-id">5</span><h3>Importancia de features (RF de regresión)</h3><span class="badge">1 figura</span><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e03_regresion.py#L299" target="_blank" rel="noopener" title="Abre e03_regresion.py en la línea 299. Ejecutar solo este paso: python etapas/e03_regresion.py --paso 5">Ver código<code>e03_regresion.py:299</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="figs one"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/5_importancias_rf.png" data-cap="5 · importancias rf" data-group="etapa03-p5" aria-label="Ampliar 5 · importancias rf"><img src="figures/03_regresion/5_importancias_rf.png" alt="5 · importancias rf" loading="lazy"></button><figcaption>5 · importancias rf</figcaption></figure></div><div class="prose"><ul>
 <li><strong>Gráfica <code>5_importancias_rf.png</code>:</strong> <strong>family_history_with_overweight 0.246</strong>, <strong>Height
@@ -1426,7 +1408,369 @@ para no &quot;inflar&quot; el R² añadiendo variables inútiles.</li>
 </div><details class="tabfigs"><summary>Tablas de este paso como imagen <span class="count">1</span></summary><div class="figs mini"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/6_tabla1_tabla_de_resultados.png" data-cap="6 · tabla de resultados" data-group="etapa03-p6-t" aria-label="Ampliar 6 · tabla de resultados"><img src="figures/03_regresion/tablas/6_tabla1_tabla_de_resultados.png" alt="6 · tabla de resultados" loading="lazy"></button><figcaption>6 · tabla de resultados</figcaption></figure></div></details></div></article><article class="step" id="etapa03-p7"><header class="step-head"><span class="step-id">7</span><h3>Conclusiones de regresión (texto)</h3><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="prose"><p>RF es el mejor (MAE 4.84, RMSE 8.25, R² 0.899, R² adj 0.894). Poda: completo 0.778 → podado
 0.814 → postpoda 0.824 → árbol de GridSearch 0.837. KNN (K=3) supera al árbol (0.854). Todas las
 raíces: family_history. Sin fuga: el peso se predice sin NObeyesdad.</p>
-</div></div></article><footer class="sec-foot"><button type="button" class="done-btn" data-sec="etapa03" aria-pressed="false"><span class="tick" aria-hidden="true"></span><span class="lbl">Marcar sección como estudiada</span></button></footer></section><section class="sec" id="etapa04" data-sec="etapa04"><header class="sec-head"><p class="eyebrow">Etapas</p><h2>Etapa 04 — Clustering K-Means, paso a paso</h2></header><div class="prose intro"><p><strong>Archivo:</strong> <code>etapas/e04_clustering.py</code>. <strong>Figuras:</strong> <code>figures/04_clustering/</code>.</p>
+</div></div></article><div class="aparte" id="etapa03-variantes"><div class="prose intro"><h3>Variantes de regresión (bloque aparte)</h3>
+<p>Estos tres pasos llevan a regresión las tres variantes que la etapa 02 hace en clasificación: quitar la
+medida corporal (variante B), quedarse sólo con las filas reales (paso 8) y añadir ruido a los hábitos
+(paso 7). <strong>Son un bloque aislado:</strong> no cambian los modelos, las tablas ni las conclusiones de los
+pasos 1–7.</p>
+<p><strong>Ejecutar sólo estos pasos:</strong> <code>python etapas/e03_regresion.py --paso 8 9 10</code>. En la app web
+están en la etapa 03, pasos 8, 9 y 10.</p>
+</div><article class="step" id="etapa03-p8"><header class="step-head"><span class="step-id">8</span><h3>Variante sin Height</h3><span class="badge">2 figuras</span><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e03_regresion.py#L341" target="_blank" rel="noopener" title="Abre e03_regresion.py en la línea 341. Ejecutar solo este paso: python etapas/e03_regresion.py --paso 8">Ver código<code>e03_regresion.py:341</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="figs"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/8_comparacion_con_sin_height.png" data-cap="8 · comparacion con sin height" data-group="etapa03-p8" aria-label="Ampliar 8 · comparacion con sin height"><img src="figures/03_regresion/8_comparacion_con_sin_height.png" alt="8 · comparacion con sin height" loading="lazy"></button><figcaption>8 · comparacion con sin height</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/8_importancias_rf_sin_height.png" data-cap="8 · importancias rf sin height" data-group="etapa03-p8" aria-label="Ampliar 8 · importancias rf sin height"><img src="figures/03_regresion/8_importancias_rf_sin_height.png" alt="8 · importancias rf sin height" loading="lazy"></button><figcaption>8 · importancias rf sin height</figcaption></figure></div><div class="prose"><ul>
+<li>
+<p><strong>Motivación:</strong> es la variante B de clasificación llevada a regresión. Weight es el target, así que
+la única medida corporal que queda entre las features es <strong>Height</strong>. Al quitarla, el modelo sólo
+cuenta con hábitos, edad, sexo y antecedente familiar. La pregunta es cuánto del peso se explica sin
+ninguna medida del cuerpo.</p>
+</li>
+<li>
+<p><strong>Mismo protocolo que el paso 2:</strong> mismo split, mismas grillas (<code>make_models</code>), GridSearchCV
+con <code>KFold(5)</code> y RMSE. Sólo cambia <code>DROP_H = [&quot;Height&quot;]</code>: 18 features en lugar de 19.
+Mejores hiperparámetros: árbol depth None y leaf 5; RF 400 árboles, depth None y leaf 1; KNN K = 5 y distance.</p>
+</li>
+<li>
+<p><strong>Resultados en test (418 filas):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Modelo</th>
+<th>RMSE con Height</th>
+<th>RMSE sin Height</th>
+<th>R² con Height</th>
+<th>R² sin Height</th>
+<th>MAE sin Height</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Baseline (media)</td>
+<td>25.91</td>
+<td>25.91</td>
+<td>−0.0001</td>
+<td>−0.0001</td>
+<td>21.71</td>
+</tr>
+<tr>
+<td>Árbol de regresión</td>
+<td>10.47</td>
+<td>12.50</td>
+<td>0.837</td>
+<td>0.767</td>
+<td>7.44</td>
+</tr>
+<tr>
+<td><strong>Random Forest</strong></td>
+<td><strong>8.25</strong></td>
+<td><strong>8.72</strong></td>
+<td><strong>0.899</strong></td>
+<td><strong>0.887</strong></td>
+<td><strong>5.20</strong></td>
+</tr>
+<tr>
+<td>KNN</td>
+<td>9.91</td>
+<td>10.49</td>
+<td>0.854</td>
+<td>0.836</td>
+<td>5.80</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>
+<p><strong>Gráfica <code>8_comparacion_con_sin_height.png</code>:</strong> barras agrupadas por modelo, azul con Height y
+naranja sin Height. Izquierda RMSE (más bajo es mejor), derecha R² (más alto es mejor).</p>
+</li>
+<li>
+<p><strong>Gráfica <code>8_importancias_rf_sin_height.png</code>:</strong> <strong>family_history 0.246</strong>, Age 0.134, FCVC 0.118,
+Gender 0.094, FAF 0.080, CALC 0.077… Respecto al paso 5 suben Age (0.083 → 0.134) y Gender (0.057 →
+0.094): toman parte del papel de la estatura (los hombres son más altos).</p>
+</li>
+<li>
+<p><strong>Cómo se lee y qué concluir:</strong></p>
+<ol>
+<li>Quitar Height <strong>cuesta poco</strong>: el RF pasa de 8.25 a 8.72 kg de RMSE (+0.47 kg) y su R² de 0.899
+a 0.887. El árbol es el que más pierde (+2.0 kg).</li>
+<li>Es un resultado <strong>sospechoso</strong>: la estatura es, físicamente, el mejor predictor del peso. Que
+casi no haga falta indica que, en este dataset, el antecedente familiar y los hábitos bastan para
+saber de qué grupo de filas viene cada persona. El 77 % de las filas son sintéticas (SMOTE) y se
+crearon interpolando entre vecinos de la misma clase de peso.</li>
+<li>El paso 9 comprueba esa sospecha con las filas reales.</li>
+</ol>
+</li>
+</ul>
+</div><details class="tabfigs"><summary>Tablas de este paso como imagen <span class="count">3</span></summary><div class="figs mini"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/8_tabla1_sin_height_rmse_de_cv_y_metricas_en_test.png" data-cap="8 · sin height rmse de cv y metricas en test" data-group="etapa03-p8-t" aria-label="Ampliar 8 · sin height rmse de cv y metricas en test"><img src="figures/03_regresion/tablas/8_tabla1_sin_height_rmse_de_cv_y_metricas_en_test.png" alt="8 · sin height rmse de cv y metricas en test" loading="lazy"></button><figcaption>8 · sin height rmse de cv y metricas en test</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/8_tabla2_comparacion_con_height_vs_sin_height.png" data-cap="8 · comparacion con height vs sin height" data-group="etapa03-p8-t" aria-label="Ampliar 8 · comparacion con height vs sin height"><img src="figures/03_regresion/tablas/8_tabla2_comparacion_con_height_vs_sin_height.png" alt="8 · comparacion con height vs sin height" loading="lazy"></button><figcaption>8 · comparacion con height vs sin height</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/8_tabla3_importancias_rf_sin_height.png" data-cap="8 · importancias rf sin height" data-group="etapa03-p8-t" aria-label="Ampliar 8 · importancias rf sin height"><img src="figures/03_regresion/tablas/8_tabla3_importancias_rf_sin_height.png" alt="8 · importancias rf sin height" loading="lazy"></button><figcaption>8 · importancias rf sin height</figcaption></figure></div></details></div></article><article class="step" id="etapa03-p9"><header class="step-head"><span class="step-id">9</span><h3>Sólo filas reales (sin SMOTE)</h3><span class="badge">1 figura</span><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e03_regresion.py#L474" target="_blank" rel="noopener" title="Abre e03_regresion.py en la línea 474. Ejecutar solo este paso: python etapas/e03_regresion.py --paso 9">Ver código<code>e03_regresion.py:474</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="figs one"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/9_filas_reales.png" data-cap="9 · filas reales" data-group="etapa03-p9" aria-label="Ampliar 9 · filas reales"><img src="figures/03_regresion/9_filas_reales.png" alt="9 · filas reales" loading="lazy"></button><figcaption>9 · filas reales</figcaption></figure></div><div class="prose"><ul>
+<li>
+<p><strong>Motivación:</strong> el paso 8 de clasificación llevado a regresión. Se elimina SMOTE por completo y
+se predice el peso sólo con las respuestas originales de la encuesta, con y sin Height.</p>
+</li>
+<li>
+<p><strong>Filas reales:</strong> las mismas que en clasificación (<code>filas_reales(X)</code>: Age, FCVC, NCP, CH2O, FAF y
+TUE son enteras). Son <strong>491 de 2087 (23.5 %)</strong>; en el test hay 107 reales y 311 sintéticas.</p>
+</li>
+<li>
+<p><strong>Las filas reales pesan mucho menos:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Weight (kg)</th>
+<th>Filas reales (491)</th>
+<th>Filas sintéticas (1596)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Media</td>
+<td>69.6</td>
+<td>92.2</td>
+</tr>
+<tr>
+<td>Mediana</td>
+<td>67.0</td>
+<td>90.0</td>
+</tr>
+<tr>
+<td>Desviación</td>
+<td>17.1</td>
+<td>26.2</td>
+</tr>
+</tbody>
+</table></div>
+<p>La encuesta original es sobre todo de personas con peso normal. SMOTE generó casi todas las filas
+de obesidad, y con ellas la mayor parte de la variación del peso.</p>
+</li>
+<li>
+<p><strong>Primera evidencia (modelos del proyecto, pasos 2 y 8, con el test separado):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Modelo</th>
+<th>RMSE filas reales</th>
+<th>RMSE filas sintéticas</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Con Height · Árbol</td>
+<td>12.88</td>
+<td>9.49</td>
+</tr>
+<tr>
+<td>Con Height · Random Forest</td>
+<td>12.46</td>
+<td>6.16</td>
+</tr>
+<tr>
+<td>Con Height · KNN</td>
+<td>16.89</td>
+<td>5.81</td>
+</tr>
+<tr>
+<td>Sin Height · Random Forest</td>
+<td>14.11</td>
+<td>5.81</td>
+</tr>
+<tr>
+<td>Sin Height · KNN</td>
+<td>17.18</td>
+<td>6.82</td>
+</tr>
+</tbody>
+</table></div>
+<p>El error de ~8 kg del paso 2 es un promedio que esconde dos grupos: en las personas reales el error es
+<strong>el doble o el triple</strong> que en las sintéticas. KNN es el caso extremo (16.9 vs 5.8 kg): en las
+filas sintéticas casi siempre encuentra un «gemelo» interpolado muy cerca.</p>
+</li>
+<li>
+<p><strong>Entrenando y evaluando sólo con filas reales</strong> (CV de 3 folds × 10 repeticiones, modelos con
+hiperparámetros fijos: con 491 filas, un GridSearch exigiría CV anidada):</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Modelo</th>
+<th>RMSE con Height</th>
+<th>R² con Height</th>
+<th>RMSE sin Height</th>
+<th>R² sin Height</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Línea base (media)</td>
+<td>17.07</td>
+<td>−0.01</td>
+<td>17.07</td>
+<td>−0.01</td>
+</tr>
+<tr>
+<td>Árbol (depth 8, leaf 5)</td>
+<td>15.90</td>
+<td>0.12</td>
+<td>16.27</td>
+<td>0.08</td>
+</tr>
+<tr>
+<td><strong>Random Forest</strong></td>
+<td><strong>14.16</strong></td>
+<td><strong>0.30</strong></td>
+<td><strong>15.59</strong></td>
+<td><strong>0.15</strong></td>
+</tr>
+<tr>
+<td>KNN (k=3, distance)</td>
+<td>16.12</td>
+<td>0.09</td>
+<td>17.46</td>
+<td>−0.06</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>
+<p><strong>Gráfica <code>9_filas_reales.png</code>:</strong> izquierda, RMSE por modelo (barras de error = desviación
+entre folds); derecha, R². Azul con Height y naranja sin Height.</p>
+</li>
+<li>
+<p><strong>Importancia de atributos (RF, filas reales, con Height):</strong> <strong>Height 0.497</strong>, Age 0.190, FAF 0.043,
+family_history 0.038… Con todo el dataset (paso 5) el primero era family_history (0.246) y Height
+quedaba segundo (0.170). En las personas reales el orden es el físicamente esperable: estatura y edad.</p>
+</li>
+<li>
+<p><strong>Cómo se lee y qué concluir:</strong></p>
+<ol>
+<li>El R² del RF cae de <strong>0.90 a 0.30</strong>. Parte de la caída es porque el peso varía menos en las
+filas reales (desviación 17 vs 26 kg). Por eso conviene comparar con la línea base: con todo el
+dataset el RF reduce su RMSE un 68 % (25.9 → 8.25 kg); en las filas reales, sólo un 17 % (17.1 → 14.2 kg).</li>
+<li>Sin Height, los hábitos explican apenas un <strong>15 %</strong> de la variación del peso, y KNN queda
+<strong>peor que predecir la media</strong>.</li>
+<li>Confirma la sospecha del paso 8: Height parecía prescindible y family_history parecía clave
+por cómo se generaron las filas sintéticas, no por cómo son las personas.</li>
+</ol>
+</li>
+<li>
+<p><strong>Limitaciones:</strong> la identificación de filas reales es heurística, son pocas filas y los
+hiperparámetros no están ajustados.</p>
+</li>
+</ul>
+</div><details class="tabfigs"><summary>Tablas de este paso como imagen <span class="count">5</span></summary><div class="figs mini"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/9_tabla1_weight_en_las_filas_reales_vs_sinteticas.png" data-cap="9 · weight en las filas reales vs sinteticas" data-group="etapa03-p9-t" aria-label="Ampliar 9 · weight en las filas reales vs sinteticas"><img src="figures/03_regresion/tablas/9_tabla1_weight_en_las_filas_reales_vs_sinteticas.png" alt="9 · weight en las filas reales vs sinteticas" loading="lazy"></button><figcaption>9 · weight en las filas reales vs sinteticas</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/9_tabla2_modelos_del_proyecto_error_en_las_filas.png" data-cap="9 · modelos del proyecto error en las filas" data-group="etapa03-p9-t" aria-label="Ampliar 9 · modelos del proyecto error en las filas"><img src="figures/03_regresion/tablas/9_tabla2_modelos_del_proyecto_error_en_las_filas.png" alt="9 · modelos del proyecto error en las filas" loading="lazy"></button><figcaption>9 · modelos del proyecto error en las filas</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/9_tabla3_solo_filas_reales_con_height_cv_310.png" data-cap="9 · solo filas reales con height cv 3x10" data-group="etapa03-p9-t" aria-label="Ampliar 9 · solo filas reales con height cv 3x10"><img src="figures/03_regresion/tablas/9_tabla3_solo_filas_reales_con_height_cv_310.png" alt="9 · solo filas reales con height cv 3x10" loading="lazy"></button><figcaption>9 · solo filas reales con height cv 3x10</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/9_tabla4_solo_filas_reales_sin_height_cv_310.png" data-cap="9 · solo filas reales sin height cv 3x10" data-group="etapa03-p9-t" aria-label="Ampliar 9 · solo filas reales sin height cv 3x10"><img src="figures/03_regresion/tablas/9_tabla4_solo_filas_reales_sin_height_cv_310.png" alt="9 · solo filas reales sin height cv 3x10" loading="lazy"></button><figcaption>9 · solo filas reales sin height cv 3x10</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/9_tabla5_importancia_de_atributos_random_forest_f.png" data-cap="9 · importancia de atributos random forest" data-group="etapa03-p9-t" aria-label="Ampliar 9 · importancia de atributos random forest"><img src="figures/03_regresion/tablas/9_tabla5_importancia_de_atributos_random_forest_f.png" alt="9 · importancia de atributos random forest" loading="lazy"></button><figcaption>9 · importancia de atributos random forest</figcaption></figure></div></details></div></article><article class="step" id="etapa03-p10"><header class="step-head"><span class="step-id">10</span><h3>Robustez ante ruido (jittering)</h3><span class="badge">1 figura</span><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e03_regresion.py#L540" target="_blank" rel="noopener" title="Abre e03_regresion.py en la línea 540. Ejecutar solo este paso: python etapas/e03_regresion.py --paso 10">Ver código<code>e03_regresion.py:540</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="figs one"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/10_barrido_ruido.png" data-cap="10 · barrido ruido" data-group="etapa03-p10" aria-label="Ampliar 10 · barrido ruido"><img src="figures/03_regresion/10_barrido_ruido.png" alt="10 · barrido ruido" loading="lazy"></button><figcaption>10 · barrido ruido</figcaption></figure></div><div class="prose"><ul>
+<li>
+<p><strong>Motivación:</strong> el paso 7 de clasificación llevado a regresión. Se usa el mismo ruido
+(<code>_con_ruido</code> de la etapa 02): <code>N(0, (α·σ)²)</code> en Age, FCVC, NCP, CH2O, FAF y TUE, en train y en test,
+recortado a <code>RANGOS_HABITOS</code>. <strong>Height no se perturba</strong>, porque es una medida y no un hábito. Se
+reentrenan 4 modelos fijos (sin GridSearch) con y sin Height.</p>
+</li>
+<li>
+<p><strong>RMSE en test (kg) según el nivel de ruido:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Ruido</th>
+<th>Árbol</th>
+<th>Random Forest</th>
+<th>KNN k=1</th>
+<th>KNN k=3 distance</th>
+</tr>
+</thead>
+<tbody>
+<tr><td colspan="5"><strong>Con Height</strong></td></tr>
+<tr>
+<td>0 %</td>
+<td>12.20</td>
+<td>8.35</td>
+<td>11.85</td>
+<td>9.91</td>
+</tr>
+<tr>
+<td>5 %</td>
+<td>13.76</td>
+<td>8.73</td>
+<td>11.15</td>
+<td>10.20</td>
+</tr>
+<tr>
+<td>10 %</td>
+<td>14.34</td>
+<td>9.07</td>
+<td>10.99</td>
+<td>10.08</td>
+</tr>
+<tr>
+<td>15 %</td>
+<td>14.49</td>
+<td>9.25</td>
+<td>11.13</td>
+<td>10.13</td>
+</tr>
+<tr>
+<td>20 %</td>
+<td>14.86</td>
+<td>9.22</td>
+<td>11.54</td>
+<td>10.17</td>
+</tr>
+<tr><td colspan="5"><strong>Sin Height</strong></td></tr>
+<tr>
+<td>0 %</td>
+<td>13.57</td>
+<td>8.74</td>
+<td>13.35</td>
+<td>10.77</td>
+</tr>
+<tr>
+<td>5 %</td>
+<td>16.48</td>
+<td>10.10</td>
+<td>13.57</td>
+<td>10.93</td>
+</tr>
+<tr>
+<td>10 %</td>
+<td>17.12</td>
+<td>10.71</td>
+<td>12.63</td>
+<td>11.12</td>
+</tr>
+<tr>
+<td>15 %</td>
+<td>15.69</td>
+<td>11.02</td>
+<td>13.20</td>
+<td>11.29</td>
+</tr>
+<tr>
+<td>20 %</td>
+<td>15.77</td>
+<td>11.42</td>
+<td>13.39</td>
+<td>11.41</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>
+<p><strong>Gráfica <code>10_barrido_ruido.png</code>:</strong> dos paneles con el mismo eje y (izquierda con Height,
+derecha sin Height). Una línea por modelo; eje x = nivel de ruido (% de la desviación) y eje y = RMSE en
+test. Aquí <strong>más bajo es mejor</strong>: al revés que el accuracy del paso 7 de clasificación.</p>
+</li>
+<li>
+<p><strong>Cómo se lee y qué concluir:</strong></p>
+<ol>
+<li><strong>El árbol</strong> es el más frágil, como en clasificación: con 5 % de ruido ya pierde 1.6 kg (con
+Height) o 2.9 kg (sin Height). Sus cortes <code>x ≤ umbral</code> cambian de lado con perturbaciones pequeñas.</li>
+<li><strong>RF</strong> sigue siendo el mejor, pero empeora de forma continua: +0.9 kg al 20 % con Height y
+<strong>+2.7 kg sin Height</strong>. Sin la estatura depende sólo de los hábitos ruidosos, y al 20 % ya
+empata con KNN k=3 (11.42 vs 11.41).</li>
+<li><strong>KNN k=3 distance</strong> casi no se mueve (+0.3 kg con Height, +0.6 sin Height): promediar 3
+vecinos absorbe el ruido.</li>
+<li><strong>KNN k=1</strong> sube y baja sin una tendencia clara; con Height incluso mejora un poco con ruido.
+Con un solo vecino, el error depende sobre todo de qué fila le toca, y el ruido sólo cambia cuál es.</li>
+<li><strong>Height protege:</strong> como no se perturba, todos los modelos empeoran menos cuando la tienen.</li>
+</ol>
+</li>
+<li>
+<p><strong>Lo que este paso NO resuelve:</strong> el ruido perturba los datos pero no quita SMOTE. Eso lo hace el paso 9.</p>
+</li>
+</ul>
+</div><details class="tabfigs"><summary>Tablas de este paso como imagen <span class="count">4</span></summary><div class="figs mini"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/10_tabla1_rmse_en_test_por_nivel_de_ruido_con_heig.png" data-cap="10 · rmse en test por nivel de ruido con height" data-group="etapa03-p10-t" aria-label="Ampliar 10 · rmse en test por nivel de ruido con height"><img src="figures/03_regresion/tablas/10_tabla1_rmse_en_test_por_nivel_de_ruido_con_heig.png" alt="10 · rmse en test por nivel de ruido con height" loading="lazy"></button><figcaption>10 · rmse en test por nivel de ruido con height</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/10_tabla2_aumento_del_rmse_respecto_a_sin_ruido_en.png" data-cap="10 · aumento del rmse respecto a sin ruido (con height)" data-group="etapa03-p10-t" aria-label="Ampliar 10 · aumento del rmse respecto a sin ruido (con height)"><img src="figures/03_regresion/tablas/10_tabla2_aumento_del_rmse_respecto_a_sin_ruido_en.png" alt="10 · aumento del rmse respecto a sin ruido (con height)" loading="lazy"></button><figcaption>10 · aumento del rmse respecto a sin ruido (con height)</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/10_tabla3_rmse_en_test_por_nivel_de_ruido_sin_heig.png" data-cap="10 · rmse en test por nivel de ruido sin height" data-group="etapa03-p10-t" aria-label="Ampliar 10 · rmse en test por nivel de ruido sin height"><img src="figures/03_regresion/tablas/10_tabla3_rmse_en_test_por_nivel_de_ruido_sin_heig.png" alt="10 · rmse en test por nivel de ruido sin height" loading="lazy"></button><figcaption>10 · rmse en test por nivel de ruido sin height</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/03_regresion/tablas/10_tabla4_aumento_del_rmse_respecto_a_sin_ruido_en.png" data-cap="10 · aumento del rmse respecto a sin ruido (sin height)" data-group="etapa03-p10-t" aria-label="Ampliar 10 · aumento del rmse respecto a sin ruido (sin height)"><img src="figures/03_regresion/tablas/10_tabla4_aumento_del_rmse_respecto_a_sin_ruido_en.png" alt="10 · aumento del rmse respecto a sin ruido (sin height)" loading="lazy"></button><figcaption>10 · aumento del rmse respecto a sin ruido (sin height)</figcaption></figure></div></details></div></article></div><footer class="sec-foot"><button type="button" class="done-btn" data-sec="etapa03" aria-pressed="false"><span class="tick" aria-hidden="true"></span><span class="lbl">Marcar sección como estudiada</span></button></footer></section><section class="sec" id="etapa04" data-sec="etapa04"><header class="sec-head"><p class="eyebrow">Etapas</p><h2>Etapa 04 — Clustering K-Means, paso a paso</h2></header><div class="prose intro"><p><strong>Archivo:</strong> <code>etapas/e04_clustering.py</code>. <strong>Figuras:</strong> <code>figures/04_clustering/</code>.</p>
 <p><strong>Protocolo:</strong> las 20 features de clasificación <strong>sin la clase</strong>, escaladas con
 <code>StandardScaler</code> (sobre las 2087 filas: en no supervisado no hay train/test) → elegir K con 5
 métodos para K ∈ [2, 12] → K-Means con K = 7 (número de clases reales) y comparar con
@@ -1478,7 +1822,7 @@ métodos para K ∈ [2, 12] → K-Means con K = 7 (número de clases reales) y c
 </tr>
 </tbody>
 </table></div>
-</div><nav class="chips" aria-label="Pasos de la etapa"><span class="chips-label">Ir al paso</span><a class="chip" href="#etapa04-p1"><b>1</b> Datos escalados</a><a class="chip" href="#etapa04-p2"><b>2</b> Barrido de K (tabla)</a><a class="chip" href="#etapa04-p2-1"><b>2.1</b> Método del codo</a><a class="chip" href="#etapa04-p2-2"><b>2.2</b> Silueta, Calinski-Harabasz y Davies-Bouldin</a><a class="chip" href="#etapa04-p2-3"><b>2.3</b> Estadístico gap</a><a class="chip" href="#etapa04-p2-4"><b>2.4</b> ¿Coinciden los 5 métodos?</a><a class="chip" href="#etapa04-p3"><b>3</b> K = 7 vs clases reales: métricas</a><a class="chip" href="#etapa04-p3-1"><b>3.1</b> Tabla de contingencia (clusters × clases)</a><a class="chip" href="#etapa04-p3-2"><b>3.2</b> Matriz mapeada con el algoritmo húngaro</a><a class="chip" href="#etapa04-p3-3"><b>3.3</b> Centroides en unidades originales</a><a class="chip" href="#etapa04-p3-4"><b>3.4</b> PCA 2D: clusters vs clases</a><a class="chip" href="#etapa04-p4"><b>4</b> Variantes con la columna de clase (ejercicio a</a><a class="chip" href="#etapa04-p4-1"><b>4.1</b> Elección de K con clase ordinal (5 métodos)</a><a class="chip" href="#etapa04-p4-2"><b>4.2</b> K = 7 con clase: contingencia cruda y matrices</a><a class="chip" href="#etapa04-p4-3"><b>4.3</b> Tabla comparativa sin/con clase</a><a class="chip" href="#etapa04-p4-4"><b>4.4</b> PCA 2D con clase ordinal</a><a class="chip" href="#etapa04-p4-5"><b>4.5</b> Interpretación</a><a class="chip" href="#etapa04-p5"><b>5</b> Variante sólo numéricas (8 features)</a><a class="chip" href="#etapa04-p6"><b>6</b> Conclusiones del clustering</a></nav><div class="steps-tools"><button type="button" class="btn-ghost js-expand-all">Contraer todos los pasos</button></div><article class="step" id="etapa04-p1"><header class="step-head"><span class="step-id">1</span><h3>Datos escalados</h3><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e04_clustering.py#L250" target="_blank" rel="noopener" title="Abre e04_clustering.py en la línea 250. Ejecutar solo este paso: python etapas/e04_clustering.py --paso 1">Ver código<code>e04_clustering.py:250</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="prose"><ul>
+</div><nav class="chips" aria-label="Pasos de la etapa"><span class="chips-label">Ir al paso</span><a class="chip" href="#etapa04-p1"><b>1</b> Datos escalados</a><a class="chip" href="#etapa04-p2"><b>2</b> Barrido de K (tabla)</a><a class="chip" href="#etapa04-p2-1"><b>2.1</b> Método del codo</a><a class="chip" href="#etapa04-p2-2"><b>2.2</b> Silueta, Calinski-Harabasz y Davies-Bouldin</a><a class="chip" href="#etapa04-p2-3"><b>2.3</b> Estadístico gap</a><a class="chip" href="#etapa04-p2-4"><b>2.4</b> ¿Coinciden los 5 métodos?</a><a class="chip" href="#etapa04-p3"><b>3</b> K = 7 vs clases reales: métricas</a><a class="chip" href="#etapa04-p3-1"><b>3.1</b> Tabla de contingencia (clusters × clases)</a><a class="chip" href="#etapa04-p3-2"><b>3.2</b> Matriz mapeada con el algoritmo húngaro</a><a class="chip" href="#etapa04-p3-3"><b>3.3</b> Centroides en unidades originales</a><a class="chip" href="#etapa04-p3-4"><b>3.4</b> PCA 2D: clusters vs clases</a><a class="chip" href="#etapa04-p4"><b>4</b> Variantes con la columna de clase (ejercicio a</a><a class="chip" href="#etapa04-p4-1"><b>4.1</b> Elección de K con clase (ordinal y one-hot, 5 métodos)</a><a class="chip" href="#etapa04-p4-2"><b>4.2</b> K = 7 con clase: contingencia cruda y matrices</a><a class="chip" href="#etapa04-p4-3"><b>4.3</b> Tabla comparativa sin/con clase</a><a class="chip" href="#etapa04-p4-4"><b>4.4</b> PCA 2D con clase (ordinal y one-hot)</a><a class="chip" href="#etapa04-p4-5"><b>4.5</b> Interpretación</a><a class="chip" href="#etapa04-p5"><b>5</b> Variante sólo numéricas (8 features)</a><a class="chip" href="#etapa04-p6"><b>6</b> Conclusiones del clustering</a></nav><div class="steps-tools"><button type="button" class="btn-ghost js-expand-all">Contraer todos los pasos</button></div><article class="step" id="etapa04-p1"><header class="step-head"><span class="step-id">1</span><h3>Datos escalados</h3><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e04_clustering.py#L250" target="_blank" rel="noopener" title="Abre e04_clustering.py en la línea 250. Ejecutar solo este paso: python etapas/e04_clustering.py --paso 1">Ver código<code>e04_clustering.py:250</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="prose"><ul>
 <li><code>X_scaled</code>: (2087, 20). <strong>Advertencia clave:</strong> al estandarizar, <code>MTRANS_Bike</code> (7 unos) toma el
 valor z ≈ <strong>17.2</strong> para esas 7 personas; esas binarias raras pesan muchísimo en la distancia
 euclídea. Esto explica casi todo lo que pasa en la etapa.</li>
@@ -1713,7 +2057,6 @@ confirman que los clusters no reproducen las clases.</li>
 <th>Cluster</th>
 <th>n</th>
 <th>Clase mapeada</th>
-<th>Qué lo caracteriza</th>
 </tr>
 </thead>
 <tbody>
@@ -1721,43 +2064,36 @@ confirman que los clusters no reproducen las clases.</li>
 <td>0</td>
 <td>55</td>
 <td>Normal_Weight</td>
-<td>usuarios que <strong>caminan</strong> (MTRANS_Walking)</td>
 </tr>
 <tr>
 <td>1</td>
 <td>576</td>
 <td>Obesity_Type_III</td>
-<td>mujeres (Gender 0.17), antecedente 1.00, transporte público</td>
 </tr>
 <tr>
 <td>2</td>
 <td>441</td>
 <td>Obesity_Type_I</td>
-<td><strong>automóvil</strong>, mayores (32 años)</td>
 </tr>
 <tr>
 <td>3</td>
 <td>654</td>
 <td>Obesity_Type_II</td>
-<td>hombres (0.79), antecedente 1.00, transporte público, 104 kg</td>
 </tr>
 <tr>
 <td>4</td>
 <td>11</td>
 <td>Overweight_Level_II</td>
-<td>usuarios de <strong>moto</strong></td>
 </tr>
 <tr>
 <td>5</td>
 <td>343</td>
 <td>Insufficient_Weight</td>
-<td>jóvenes, <strong>sin antecedente</strong> (0.12), 56 kg</td>
 </tr>
 <tr>
 <td>6</td>
 <td>7</td>
 <td>Overweight_Level_I</td>
-<td>usuarios de <strong>bici</strong></td>
 </tr>
 </tbody>
 </table></div>
@@ -1781,10 +2117,11 @@ proyección muy aplanada de 20 dimensiones; sirve para intuir, no para concluir.
 <li><strong>One-hot:</strong> se añaden 7 columnas <code>clase_*</code> → 27 columnas.</li>
 </ol>
 <p>Ambas se estandarizan con su propio <code>StandardScaler</code> antes de K-Means con K = 7.</p>
-</div></div></article><article class="step" id="etapa04-p4-1"><header class="step-head"><span class="step-id">4.1</span><h3>Elección de K con clase ordinal (5 métodos)</h3><span class="badge">1 figura</span><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e04_clustering.py#L380" target="_blank" rel="noopener" title="Abre e04_clustering.py en la línea 380. Ejecutar solo este paso: python etapas/e04_clustering.py --paso 4.1">Ver código<code>e04_clustering.py:380</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="figs one"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/04_clustering/4.1_cinco_metodos_con_clase_ordinal.png" data-cap="4.1 · cinco metodos con clase ordinal" data-group="etapa04-p4-1" aria-label="Ampliar 4.1 · cinco metodos con clase ordinal"><img src="figures/04_clustering/4.1_cinco_metodos_con_clase_ordinal.png" alt="4.1 · cinco metodos con clase ordinal" loading="lazy"></button><figcaption>4.1 · cinco metodos con clase ordinal</figcaption></figure></div><div class="prose"><ul>
-<li><strong>Gráfica <code>4.1_cinco_metodos_con_clase_ordinal.png</code>:</strong> panel 2 × 3 (codo, silueta, CH, DB,
-gap; el sexto panel vacío). Resultado: codo 5, silueta 2, CH 3, DB 9, gap 2 → <strong>siguen sin
-coincidir</strong>.</li>
+</div></div></article><article class="step" id="etapa04-p4-1"><header class="step-head"><span class="step-id">4.1</span><h3>Elección de K con clase (ordinal y one-hot, 5 métodos)</h3><span class="badge">2 figuras</span><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e04_clustering.py#L380" target="_blank" rel="noopener" title="Abre e04_clustering.py en la línea 380. Ejecutar solo este paso: python etapas/e04_clustering.py --paso 4.1">Ver código<code>e04_clustering.py:380</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="figs"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/04_clustering/4.1_cinco_metodos_con_clase_ordinal.png" data-cap="4.1 · cinco metodos con clase ordinal" data-group="etapa04-p4-1" aria-label="Ampliar 4.1 · cinco metodos con clase ordinal"><img src="figures/04_clustering/4.1_cinco_metodos_con_clase_ordinal.png" alt="4.1 · cinco metodos con clase ordinal" loading="lazy"></button><figcaption>4.1 · cinco metodos con clase ordinal</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/04_clustering/4.1_cinco_metodos_con_clase_onehot.png" data-cap="4.1 · cinco metodos con clase one-hot" data-group="etapa04-p4-1" aria-label="Ampliar 4.1 · cinco metodos con clase one-hot"><img src="figures/04_clustering/4.1_cinco_metodos_con_clase_onehot.png" alt="4.1 · cinco metodos con clase one-hot" loading="lazy"></button><figcaption>4.1 · cinco metodos con clase one-hot</figcaption></figure></div><div class="prose"><ul>
+<li><strong>Dos gráficas, una por variante</strong>, cada una con su título arriba: <code>4.1_cinco_metodos_con_clase_ordinal.png</code> (primera) y
+<code>4.1_cinco_metodos_con_clase_onehot.png</code> (segunda). Panel 2 × 3 (codo, silueta, CH, DB, gap; el sexto panel vacío).</li>
+<li><strong>Resultado ordinal:</strong> codo 5, silueta 2, CH 3, DB 9, gap 2 → <strong>siguen sin coincidir</strong>.</li>
+<li><strong>Resultado one-hot:</strong> codo 5, silueta 12, CH 3, DB 11, gap 2 → tampoco coinciden.</li>
 </ul>
 </div><details class="tabfigs"><summary>Tablas de este paso como imagen <span class="count">1</span></summary><div class="figs mini"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/04_clustering/tablas/4.1_tabla1_k_optimo_por_metodo_con_clase_ordinal.png" data-cap="4.1 · k optimo por metodo con clase ordinal" data-group="etapa04-p4-1-t" aria-label="Ampliar 4.1 · k optimo por metodo con clase ordinal"><img src="figures/04_clustering/tablas/4.1_tabla1_k_optimo_por_metodo_con_clase_ordinal.png" alt="4.1 · k optimo por metodo con clase ordinal" loading="lazy"></button><figcaption>4.1 · k optimo por metodo con clase ordinal</figcaption></figure></div></details></div></article><article class="step" id="etapa04-p4-2"><header class="step-head"><span class="step-id">4.2</span><h3>K = 7 con clase: contingencia cruda y matrices mapeadas</h3><span class="badge">2 figuras</span><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e04_clustering.py#L411" target="_blank" rel="noopener" title="Abre e04_clustering.py en la línea 411. Ejecutar solo este paso: python etapas/e04_clustering.py --paso 4.2">Ver código<code>e04_clustering.py:411</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="figs"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/04_clustering/4.2_contingencia_cruda_con_clase.png" data-cap="4.2 · contingencia cruda con clase" data-group="etapa04-p4-2" aria-label="Ampliar 4.2 · contingencia cruda con clase"><img src="figures/04_clustering/4.2_contingencia_cruda_con_clase.png" alt="4.2 · contingencia cruda con clase" loading="lazy"></button><figcaption>4.2 · contingencia cruda con clase</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/04_clustering/4.2_matrices_mapeadas_con_clase.png" data-cap="4.2 · matrices mapeadas con clase" data-group="etapa04-p4-2" aria-label="Ampliar 4.2 · matrices mapeadas con clase"><img src="figures/04_clustering/4.2_matrices_mapeadas_con_clase.png" alt="4.2 · matrices mapeadas con clase" loading="lazy"></button><figcaption>4.2 · matrices mapeadas con clase</figcaption></figure></div><div class="prose"><ul>
 <li><strong><code>4.2_contingencia_cruda_con_clase.png</code>:</strong> tablas de contingencia antes del mapeo (ordinal y
@@ -1834,9 +2171,10 @@ ordinal extremo) se recupera bien (F1 0.956) y Overweight_Level_II no tiene ning
 </tr>
 </tbody>
 </table></div>
-</div><details class="tabfigs"><summary>Tablas de este paso como imagen <span class="count">1</span></summary><div class="figs mini"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/04_clustering/tablas/4.3_tabla1_comparativa_de_clustering_k_7.png" data-cap="4.3 · comparativa de clustering k 7" data-group="etapa04-p4-3-t" aria-label="Ampliar 4.3 · comparativa de clustering k 7"><img src="figures/04_clustering/tablas/4.3_tabla1_comparativa_de_clustering_k_7.png" alt="4.3 · comparativa de clustering k 7" loading="lazy"></button><figcaption>4.3 · comparativa de clustering k 7</figcaption></figure></div></details></div></article><article class="step" id="etapa04-p4-4"><header class="step-head"><span class="step-id">4.4</span><h3>PCA 2D con clase ordinal</h3><span class="badge">1 figura</span><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e04_clustering.py#L442" target="_blank" rel="noopener" title="Abre e04_clustering.py en la línea 442. Ejecutar solo este paso: python etapas/e04_clustering.py --paso 4.4">Ver código<code>e04_clustering.py:442</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="figs one"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/04_clustering/4.4_pca_2d_con_clase_ordinal.png" data-cap="4.4 · pca 2d con clase ordinal" data-group="etapa04-p4-4" aria-label="Ampliar 4.4 · pca 2d con clase ordinal"><img src="figures/04_clustering/4.4_pca_2d_con_clase_ordinal.png" alt="4.4 · pca 2d con clase ordinal" loading="lazy"></button><figcaption>4.4 · pca 2d con clase ordinal</figcaption></figure></div><div class="prose"><ul>
-<li><strong>Gráfica <code>4.4_pca_2d_con_clase_ordinal.png</code>:</strong> igual que 3.4 (PC1 + PC2 = 26.9 %). Se parece un
+</div><details class="tabfigs"><summary>Tablas de este paso como imagen <span class="count">1</span></summary><div class="figs mini"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/04_clustering/tablas/4.3_tabla1_comparativa_de_clustering_k_7.png" data-cap="4.3 · comparativa de clustering k 7" data-group="etapa04-p4-3-t" aria-label="Ampliar 4.3 · comparativa de clustering k 7"><img src="figures/04_clustering/tablas/4.3_tabla1_comparativa_de_clustering_k_7.png" alt="4.3 · comparativa de clustering k 7" loading="lazy"></button><figcaption>4.3 · comparativa de clustering k 7</figcaption></figure></div></details></div></article><article class="step" id="etapa04-p4-4"><header class="step-head"><span class="step-id">4.4</span><h3>PCA 2D con clase (ordinal y one-hot)</h3><span class="badge">2 figuras</span><a class="codelink" href="https://github.com/DanGomez2002/ia2-obesidad-py/blob/main/etapas/e04_clustering.py#L442" target="_blank" rel="noopener" title="Abre e04_clustering.py en la línea 442. Ejecutar solo este paso: python etapas/e04_clustering.py --paso 4.4">Ver código<code>e04_clustering.py:442</code></a><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="figs"><figure class="fig"><button type="button" class="fig-btn" data-src="figures/04_clustering/4.4_pca_2d_con_clase_ordinal.png" data-cap="4.4 · pca 2d con clase ordinal" data-group="etapa04-p4-4" aria-label="Ampliar 4.4 · pca 2d con clase ordinal"><img src="figures/04_clustering/4.4_pca_2d_con_clase_ordinal.png" alt="4.4 · pca 2d con clase ordinal" loading="lazy"></button><figcaption>4.4 · pca 2d con clase ordinal</figcaption></figure><figure class="fig"><button type="button" class="fig-btn" data-src="figures/04_clustering/4.4_pca_2d_con_clase_onehot.png" data-cap="4.4 · pca 2d con clase one-hot" data-group="etapa04-p4-4" aria-label="Ampliar 4.4 · pca 2d con clase one-hot"><img src="figures/04_clustering/4.4_pca_2d_con_clase_onehot.png" alt="4.4 · pca 2d con clase one-hot" loading="lazy"></button><figcaption>4.4 · pca 2d con clase one-hot</figcaption></figure></div><div class="prose"><ul>
+<li><strong>Primera gráfica (<code>4.4_pca_2d_con_clase_ordinal.png</code>):</strong> igual que 3.4 (PC1 + PC2 = 26.9 %). Se parece un
 poco más a las clases, pero sigue lejos.</li>
+<li><strong>Segunda gráfica (<code>4.4_pca_2d_con_clase_onehot.png</code>):</strong> misma lectura con la clase en one-hot (PC1 + PC2 = 22.7 %).</li>
 </ul>
 </div></div></article><article class="step" id="etapa04-p4-5"><header class="step-head"><span class="step-id">4.5</span><h3>Interpretación</h3><button type="button" class="step-toggle" aria-expanded="true">Contraer</button></header><div class="step-body"><div class="prose"><ul>
 <li><strong>Ordinal (mejora moderada):</strong> ARI 0.088 → 0.252. Es <strong>una</strong> columna entre 21: en la distancia
@@ -1916,9 +2254,9 @@ regresión y clustering, más la tabla <strong>&quot;Mejor modelo de cada caso&q
 </tr>
 <tr>
 <td>Clasificación B · filas reales · 3 clases</td>
-<td>RF con pesos por clase</td>
+<td>KNN (k=1)</td>
 <td>macro-F1 CV 3×10</td>
-<td>0.4244</td>
+<td>0.3957</td>
 <td>línea base 0.2616</td>
 </tr>
 <tr>
@@ -1950,7 +2288,7 @@ naranja = KNN, gris = otro/baseline):</p>
 clase ordinal (0.252) y one-hot (0.999) en <strong>rojo</strong> (con la clase como feature). La barra roja
 gigante es la demostración visual de &quot;sólo recupera las clases si se le dan&quot;.</li>
 <li><strong>Variante B: con SMOTE vs sólo filas reales:</strong> macro-F1 del dataset completo (RF, 0.853) frente
-al mejor con filas reales en 7 clases (0.194) y en 3 clases (0.424), en morado; la línea negra
+al mejor con filas reales en 7 clases (0.194) y en 3 clases (0.396), en morado; la línea negra
 discontinua sobre cada barra morada es la línea base (0.104 y 0.262). Es la imagen de &quot;cuánto
 del rendimiento fabricaba SMOTE&quot;.</li>
 </ol>
@@ -1966,7 +2304,7 @@ subconjunto aleatorio de features; el RF de regresión usa todas).</li>
 que queda (0.857) <em>parecería</em> lo que predicen los hábitos, pero sigue inflado por SMOTE.</li>
 <li><strong>Sin SMOTE, los hábitos casi no predicen los 7 niveles:</strong> RF B acierta 0.946 en filas sintéticas
 del test y 0.583 en reales; sólo con filas reales, macro-F1 0.194 frente a 0.104 de la línea base
-y sin mejora útil de accuracy (0.574); en 3 niveles, 0.424 frente a 0.262. En este escenario RF
+y sin mejora útil de accuracy (0.574); en 3 niveles, 0.396 frente a 0.262. En este escenario RF
 ya no destaca.</li>
 <li><strong>KNN depende de la tarea:</strong> en clasificación queda por debajo del árbol en A; en regresión
 supera al árbol (0.854 vs 0.837) porque promediar vecinos suaviza la predicción.</li>
@@ -1986,7 +2324,7 @@ Con sólo las filas reales ningún modelo destaca con claridad.</li>
 (variante B, 85.7 %). La A responde al enunciado; para el problema real, la referencia es el
 caso sin ninguno de los dos.</li>
 <li><strong>Sin fuga ni SMOTE, los hábitos predicen poco:</strong> en 7 clases, macro-F1 0.194 frente a 0.104 de
-la línea base; en 3 niveles, señal modesta (0.424 vs 0.262) con Age, family_history y FAF como
+la línea base; en 3 niveles, señal modesta (0.396 vs 0.262) con Age, FAF y CH2O como
 atributos principales. El peso se estima con error típico de 8.2 kg sin usar la clase (dataset
 completo, con SMOTE).</li>
 <li><strong>El clustering no recupera las clases de obesidad</strong> (ARI 0.088).</li>

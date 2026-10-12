@@ -1,0 +1,8 @@
+Clase,TP,FN,FP,TN,Precision,Recall,F1
+Insufficient_Weight,123,144,232,"1,588",0.346,0.461,0.395
+Normal_Weight,98,184,259,"1,546",0.275,0.348,0.307
+Overweight_Level_I,52,224,212,"1,599",0.197,0.188,0.193
+Overweight_Level_II,63,227,189,"1,608",0.250,0.217,0.232
+Obesity_Type_I,97,254,241,"1,495",0.287,0.276,0.282
+Obesity_Type_II,91,206,170,"1,620",0.349,0.306,0.326
+Obesity_Type_III,187,137,73,"1,690",0.719,0.577,0.640

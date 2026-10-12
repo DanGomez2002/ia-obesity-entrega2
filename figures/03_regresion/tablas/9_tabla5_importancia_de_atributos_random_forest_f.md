@@ -1,0 +1,13 @@
+### Importancia de atributos (Random Forest, filas reales, con Height)
+
+|                                |   importancia |
+|:-------------------------------|--------------:|
+| Height                         |        0.4966 |
+| Age                            |        0.1899 |
+| FAF                            |        0.0432 |
+| family_history_with_overweight |        0.0375 |
+| CH2O                           |        0.035  |
+| NCP                            |        0.0302 |
+| TUE                            |        0.0287 |
+| CAEC                           |        0.026  |
+
