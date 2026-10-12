@@ -5,7 +5,7 @@ Este plan amplía el proyecto de la Entrega 1 **con su misma estructura**: la ve
 de `etapas/` + pasos numerados (`src/pasos.py`), con salidas en `figures/` y `resultados_texto/`
 y ejecución completa con `run_all.py`.
 
-Estado: **T3 terminada. Espera tu verificación para empezar T4.**
+Estado: **T4 terminada. Espera tu verificación para empezar T5.**
 
 ---
 
@@ -292,8 +292,8 @@ estudio y `decisiones.md`.
 | T0 | 2026-10-12 | Opus (modo plan) | Opus | Terminada (OK recibido) | `500aab5` |
 | T1 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada (OK recibido) | `2267801` |
 | T2 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada (OK recibido) | `c56fe7d` |
-| T3 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada, espera verificación | (este commit) |
-| T4 | | Opus | | Pendiente | |
+| T3 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada (OK recibido) | `f7a96a0` |
+| T4 | 2026-10-12 | Opus | Opus | Terminada, espera verificación | (este commit) |
 | T5 | | Opus | | Pendiente | |
 | T7 | | Opus | | Pendiente | |
 
@@ -502,3 +502,93 @@ en B, 1.2 s en regresión). Las cifras exactas están en `resultados_texto/07_sv
 **Código**: `etapas/e07_svm.py`, con `make_models` / `fit_evaluate` / `variante` para
 clasificación y `make_models_reg` / `_ajustar_reg` / `modelos_reg` para regresión, con los
 mismos nombres que `e02` y `e03`.
+
+### T4 — Etapa 08, Redes neuronales (Keras)
+
+**Dependencias**: `tensorflow==2.21.0` y `keras==3.15.1` (backend TensorFlow, solo CPU),
+fijadas en `requirements.txt`. Hay ruedas `win_amd64` para Python 3.10-3.13.
+
+Ejecución: `python etapas/e08_redes_neuronales.py --todo --guardar --sin-ventanas`. Sin
+errores, 45 entrenamientos (3 tareas × 3 arquitecturas × 5 semillas), unos 12 minutos.
+
+**Comprobaciones (paso 1 y paso 2)**
+- Sub-train 1418 / validación 251, ambas sacadas del train. Test de 418, con las huellas de la
+  E1: `8d9af7b40ee9` en clasificación y `021799f95367` en regresión. Hay `assert` de que
+  validación ⊂ train, que sub-train y validación no se solapan y que ninguna de las dos toca
+  el test.
+- Escaladores ajustados solo con el sub-train: las medias del X del test escalado están en
+  [−0.08, 0.11], no son 0. Target de regresión: media 86.98 kg, desviación 26.32 kg.
+- Reproducibilidad: la semilla 42 dos veces da pesos idénticos (val_loss 1.235814 en ambas,
+  5 épocas); la semilla 43 da 1.274095. Entre procesos distintos, la semilla 42 reprodujo
+  val_loss 0.2380 (A, pequeña) y 0.1086 (regresión, grande).
+- `EarlyStopping` de Keras 3.15 restaura los mejores pesos al terminar siempre, también si
+  se agotan las épocas (revisado en el código fuente).
+
+**Parámetros por arquitectura**
+
+| Tarea | pequeña [32] | media [64, 32] | grande [128, 64, 32] |
+|---|---|---|---|
+| Clasificación A (20 entradas) | 903 | 3655 | 13255 |
+| Clasificación B (18 entradas) | 839 | 3527 | 12999 |
+| Regresión (19 entradas) | 673 | 3393 | 12929 |
+
+**Elección por val_loss media de 5 semillas** (validación = 15 % del train; el test no
+interviene):
+
+| Tarea | pequeña | media | grande | Elegida |
+|---|---|---|---|---|
+| A (entropía cruzada) | **0.2370 ± 0.0395** | 0.2526 ± 0.0634 | 0.2750 ± 0.0518 | pequeña |
+| B (entropía cruzada) | 0.9395 ± 0.0142 | 0.8697 ± 0.0239 | **0.8493 ± 0.0168** | grande |
+| Regresión (MSE, y estandarizado) | 0.1493 ± 0.0176 | 0.1216 ± 0.0088 | **0.1142 ± 0.0064** | grande |
+
+Mejor época media / épocas entrenadas medias:
+
+| Tarea | pequeña | media | grande |
+|---|---|---|---|
+| A | 163 / 193 | 42 / 72 | 22 / 52 |
+| B | 62.8 / 92.8 | 25.2 / 55.2 | 12.2 / 42.2 |
+| Regresión | 126.8 / 156.8 | 30.4 / 60.4 | 19.8 / 49.8 |
+
+**Resultados en test** (semilla 42 = fila del CSV; media ± desviación de las 5 semillas)
+
+| Tarea | Red | Métrica principal, semilla 42 | Media ± desv. (5 semillas) | Otras (semilla 42) |
+|---|---|---|---|---|
+| A | pequeña [32], 903 parámetros, mejor época 157 de 187 | macro-F1 0.9227 | 0.9261 ± 0.0077 | acc 0.9258 (media 0.9292 ± 0.0071); log-loss 0.3097 |
+| B | grande, 12999 parámetros, mejor época 9 de 39 | macro-F1 0.7327 | 0.7489 ± 0.0143 | acc 0.7464 (media 0.7589 ± 0.0095); log-loss 0.8034 |
+| Regresión | grande, 12929 parámetros, mejor época 10 de 40 | RMSE 11.6764 kg | 10.4756 ± 0.6898 | MAE 7.3545 (media 6.7590 ± 0.3672); R² 0.7969 (media 0.8360 ± 0.0224); R²adj 0.7872 |
+
+- Baseline de regresión, la media del sub-train: RMSE 25.9134 y R² −0.0002. Es casi igual al
+  de E1 (25.9126 y −0.0001), que usaba la media de los 1669 del train completo.
+- La red de regresión no hace ninguna predicción fuera del rango del sub-train: van de 43.35
+  a 165.99 kg.
+- Confianza media frente a accuracy, semilla 42: A 0.944 frente a 0.926 (+0.018, algo
+  sobreconfiada); B 0.743 frente a 0.746 (−0.004, bien calibrada).
+
+**Hallazgos (reportados tal cual, sin ajustar nada)**
+
+1. **Sobreajuste rápido de las redes media y grande**, visible en las curvas de los pasos 3,
+   4 y 5: la pérdida de train baja casi a 0 mientras la de validación toca su mínimo pronto
+   y vuelve a subir.
+   - B grande: mínimo en la época 9 con la semilla 42.
+   - Regresión grande: mínimo en la época 10.
+   - El early stopping recupera esos pesos, pero no hay regularización (dropout/L2), que el
+     plan dejó fuera a propósito. **Queda como decisión abierta para ti** (ver mensaje).
+2. **La semilla 42 es la peor de las 5 en B y en regresión.**
+   - B, macro-F1: 0.7327, frente a 0.7449-0.7715 de las otras semillas.
+   - Regresión, RMSE: 11.68, frente a 9.97-10.41.
+   - En A queda cuarta: 0.9227, frente a 0.9171-0.9380.
+   - Si en T5 se compara solo la fila de la semilla 42, la red sale penalizada por azar; por
+     eso la media ± desviación va en la columna `nota` del CSV.
+3. **En A, la elección pequeña frente a media está dentro del ruido**: la media está a
+   +0.0156, que son 0.4 desviaciones. La validación de 251 filas es ruidosa: con la semilla 42
+   la media logra 0.1503, frente a 0.2380 de la pequeña.
+4. **Referencia frente a la E1 y otros modelos de E2** (macro-F1 / RMSE de test; la
+   interpretación es de T5). La red no supera al RF en ninguna tarea:
+   - A: red 0.9227 (media 0.9261) frente a RF 0.9558 y SVM 0.9678.
+   - B: red 0.7327 (media 0.7489) frente a RF 0.8528, SVM 0.7830, KNN 0.7567 y Árbol 0.7401.
+   - Regresión: red 11.68 (media 10.48) frente a RF 8.25, KNN 9.91, SVR 10.10 y Árbol 10.47.
+
+**Código**: `etapas/e08_redes_neuronales.py`, con `datos(tarea)`, `construir`, `entrenar`,
+`_comparar` / `comparacion` (en caché), `resumen_arquitecturas`, `elegida`, `_evaluar` /
+`evaluacion`. En caché se guardan historiales, pesos y métricas, no el objeto Keras; el
+modelo se reconstruye con `set_weights`.
