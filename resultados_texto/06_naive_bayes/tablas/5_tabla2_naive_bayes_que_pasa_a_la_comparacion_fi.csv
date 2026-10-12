@@ -1,0 +1,3 @@
+,NB elegido (mejor CV),cv_f1_macro,test_f1_macro
+A,CategoricalNB,0.7810,0.8030
+B,CategoricalNB,0.6523,0.6624

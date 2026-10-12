@@ -1,0 +1,8 @@
+,n,"corr(Weight, Height | clase)",IMC mín,IMC máx
+Insufficient_Weight,214,0.948,14.161,19.082
+Normal_Weight,225,0.827,18.491,24.913
+Overweight_Level_I,221,0.980,22.827,28.263
+Overweight_Level_II,232,0.961,25.714,30.363
+Obesity_Type_I,281,0.955,29.912,35.171
+Obesity_Type_II,237,0.912,34.049,39.787
+Obesity_Type_III,259,0.929,36.774,50.812

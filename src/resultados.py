@@ -121,6 +121,25 @@ def leer(ruta) -> pd.DataFrame:
     return _formato(pd.read_csv(ruta))
 
 
+def guardar_entrega2(filas: list, etapa: str) -> pd.DataFrame:
+    """Escribe en data/resultados_entrega2.csv las filas de una etapa (06, 07, 08).
+
+    Reemplaza TODAS las filas que esa etapa escribió antes (su `fuente` empieza por
+    'etapa <nn>'), así un modelo que deja de ser el elegido no se queda colgado."""
+    prefijo = f"etapa {etapa}"
+    nuevo = _formato(pd.DataFrame(filas))
+    assert nuevo["fuente"].str.startswith(prefijo).all(), "cada fila debe indicar su etapa en 'fuente'"
+    if RESULTADOS_E2.exists():
+        viejo = leer(RESULTADOS_E2)
+        viejo = viejo[~viejo["fuente"].fillna("").str.startswith(prefijo)]
+        nuevo = pd.concat([viejo, nuevo], ignore_index=True) if len(viejo) else nuevo
+    nuevo = nuevo.sort_values(["fuente", "tarea", "modelo"]).reset_index(drop=True)
+    nuevo.to_csv(RESULTADOS_E2, index=False)
+    print(f"   [resultados] {RESULTADOS_E2.relative_to(ROOT)}: {len(filas)} filas de la etapa {etapa} "
+          f"({len(nuevo)} en total)")
+    return nuevo
+
+
 def _huellas_split():
     """Huellas del test de clasificación y de regresión (sólo hace el split, no entrena)."""
     sys.path.insert(0, str(ROOT))

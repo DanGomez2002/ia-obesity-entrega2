@@ -1,0 +1,3 @@
+tarea,modelo,accuracy,f1_macro,MAE,RMSE,R2,R2_adj,cv_score,cv_metrica,log_loss,tiempo_entrenamiento_s,n_parametros,n_vectores_soporte,epocas,mejores_params,n_test,huella_test,silueta,ARI,NMI,pureza,nota,fuente
+clasificacion_A,Naive Bayes (CategoricalNB),0.8086,0.803,,,,,0.781,f1_macro,0.7642,0.0181,,,,"{'discretizar__bins__n_bins': 25, 'nb__alpha': 0.01}",418,8d9af7b40ee9,,,,,elegido por macro-F1 de CV entre GaussianNB y CategoricalNB,etapa 06 · pasos 3/4 (variante A)
+clasificacion_B,Naive Bayes (CategoricalNB),0.6914,0.6624,,,,,0.6523,f1_macro,1.1014,0.0165,,,,"{'discretizar__bins__n_bins': 20, 'nb__alpha': 0.1}",418,8d9af7b40ee9,,,,,elegido por macro-F1 de CV entre GaussianNB y CategoricalNB,etapa 06 · pasos 3/4 (variante B)

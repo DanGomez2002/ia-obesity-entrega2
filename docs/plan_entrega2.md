@@ -5,7 +5,7 @@ Este plan amplía el proyecto de la Entrega 1 **con su misma estructura**: la ve
 de `etapas/` + pasos numerados (`src/pasos.py`), con salidas en `figures/` y `resultados_texto/`
 y ejecución completa con `run_all.py`.
 
-Estado: **T1 terminada. Espera tu verificación para empezar T2.**
+Estado: **T2 terminada. Espera tu verificación para empezar T3.**
 
 ---
 
@@ -290,8 +290,8 @@ estudio y `decisiones.md`.
 | Tarea | Fecha | Modelo recomendado | Modelo usado | Estado | Commit |
 |---|---|---|---|---|---|
 | T0 | 2026-10-12 | Opus (modo plan) | Opus | Terminada (OK recibido) | `500aab5` |
-| T1 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada, espera verificación | (este commit) |
-| T2 | | Sonnet | | Pendiente | |
+| T1 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada (OK recibido) | `2267801` |
+| T2 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada, espera verificación | (este commit) |
 | T3 | | Sonnet | | Pendiente | |
 | T4 | | Opus | | Pendiente | |
 | T5 | | Opus | | Pendiente | |
@@ -357,3 +357,59 @@ clasificación y `021799f95367` en regresión. Es lo esperado: la Entrega 1 estr
 clase en un caso y por deciles de Weight en el otro, así que son particiones distintas. Lo que
 garantiza la comparación es que **dentro de cada tarea** todos los modelos (E1 y E2) usen el
 mismo test. La etapa 09 lo comprueba por tarea.
+
+### T2 — Etapa 06, Naive Bayes
+
+Ejecución: `python etapas/e06_naive_bayes.py --todo --guardar --sin-ventanas`. Sin errores,
+10 pasos, salidas en `resultados_texto/06_naive_bayes/` y `figures/06_naive_bayes/`. El split
+es el de la etapa 02 (1669/418, huella `8d9af7b40ee9`, la misma que en la E1).
+
+**Resultados (test = 418)**
+
+| Variante | Modelo | mejores params (CV) | cv macro-F1 | test acc | test macro-F1 | log-loss | confianza media |
+|---|---|---|---|---|---|---|---|
+| A | GaussianNB | var_smoothing=1e-4 | 0.6424 | 0.6699 | 0.6567 | 0.8145 | 0.7813 |
+| A | **CategoricalNB** ← elegido | n_bins=25, alpha=0.01 | **0.7810** | 0.8086 | **0.8030** | 0.7642 | 0.8864 |
+| B | GaussianNB | var_smoothing=1e-3 | 0.4939 | 0.5813 | 0.5333 | 1.5729 | 0.7779 |
+| B | **CategoricalNB** ← elegido | n_bins=20, alpha=0.1 | **0.6523** | 0.6914 | **0.6624** | 1.1014 | 0.7733 |
+
+- Tiempo de `refit` del modelo elegido: unos 0.02 s, con ruido de milisegundos entre
+  ejecuciones; GaussianNB unos 0.005 s. El tiempo exacto de cada ejecución queda en
+  `resultados_texto/06_naive_bayes/5.md`.
+- En el CSV entra, por variante, **solo el NB elegido por CV**: CategoricalNB en A y en B.
+- Como referencia de la E1 (sin interpretar todavía, eso es T5): NB queda por debajo del
+  Árbol y del RF en A y en B, y en A también por debajo de KNN… salvo que KNN-A tiene F1
+  0.8075, prácticamente empatado con NB-A (0.8030).
+
+**Hallazgos que obligaron a corregir el código o las notas (reportados tal cual):**
+
+1. **"NB no necesita escalado" era inexacto tal como lo había escrito.** Con el mismo
+   `var_smoothing` (1e-9), GaussianNB con y sin `StandardScaler` coincide solo en el **89.5 %**
+   de las predicciones del test.
+   - Causa: hay **18 pares (clase, atributo) con varianza 0** en el train (Gender,
+     family_history, FCVC, NCP, CAEC, SCC, MTRANS_Bike/Motorbike/Walking constantes dentro de
+     alguna clase). En esos pares, la varianza que usa GaussianNB es solo el suavizado
+     `var_smoothing × máx. varianza`. Esa máxima es 685.2 (Weight) sin escalar y 1 escalado.
+   - Con la misma varianza suavizada expresada en las nuevas unidades coinciden el **100.0 %**.
+   - Escalar empeora la CV: A 0.6424 → 0.5061; B 0.4939 → 0.4377.
+   - Conclusión: no se escala. La nota del paso 1 lo explica con estos números calculados.
+2. **El óptimo de `n_bins` caía en el borde de la grilla** con {3, 5, 7, 10} y otra vez con
+   tope 20. La grilla final, `N_BINS = [3, 5, 7, 10, 15, 20, 25, 30, 40, 50, 60]`, muestra una
+   meseta entre 20 y 40 tramos y una caída a partir de 50 (figura 3.2).
+3. **CALC = "Always" aparece una sola vez en el train.** Por eso `CategoricalNB(min_categories=4)`:
+   sin eso, cualquier fold sin esa fila fallaría.
+4. **Sobreconfianza comprobada, no supuesta.** En los 4 modelos la confianza media supera a la
+   accuracy en test: +0.111 y +0.078 en A, +0.197 y +0.082 en B (GaussianNB y CategoricalNB).
+5. **Independencia condicional** (paso 1.1): corr(Weight, Height | clase) entre 0.827
+   (Normal_Weight) y 0.980 (Overweight_Level_I). |corr| media dentro de las clases:
+   Height–Weight 0.930; los siguientes pares (Height–FAF 0.332, Weight–FAF 0.308,
+   Age–TUE 0.303) están muy por debajo.
+   - Los rangos de IMC por clase **se solapan** (p. ej. Overweight_Level_I llega a 28.26 y
+     Overweight_Level_II empieza en 25.71). La clase no es un corte exacto de IMC en todas las
+     filas; es coherente con lo que ya vio la etapa 02 en el paso 8.
+
+**Código nuevo**
+- `etapas/e06_naive_bayes.py`.
+- `src/resultados.py`: nueva función `guardar_entrega2(filas, etapa)`. Reemplaza las filas
+  previas de la misma etapa y solo escribe con `--guardar` o `run_all.py`, la misma convención
+  que las tablas y figuras.

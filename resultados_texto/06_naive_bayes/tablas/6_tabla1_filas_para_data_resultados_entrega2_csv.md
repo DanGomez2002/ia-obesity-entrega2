@@ -1,0 +1,7 @@
+### Filas para data/resultados_entrega2.csv
+
+|                                                    |   accuracy |   f1_macro |   cv_score |   log_loss |   tiempo_entrenamiento_s |
+|:---------------------------------------------------|-----------:|-----------:|-----------:|-----------:|-------------------------:|
+| ('clasificacion_A', 'Naive Bayes (CategoricalNB)') |     0.8086 |     0.803  |     0.781  |     0.7642 |                   0.0181 |
+| ('clasificacion_B', 'Naive Bayes (CategoricalNB)') |     0.6914 |     0.6624 |     0.6523 |     1.1014 |                   0.0165 |
+
