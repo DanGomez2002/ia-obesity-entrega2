@@ -5,7 +5,7 @@ Este plan amplía el proyecto de la Entrega 1 **con su misma estructura**: la ve
 de `etapas/` + pasos numerados (`src/pasos.py`), con salidas en `figures/` y `resultados_texto/`
 y ejecución completa con `run_all.py`.
 
-Estado: **T0 terminada. Espera tu OK para empezar T1.**
+Estado: **T1 terminada. Espera tu verificación para empezar T2.**
 
 ---
 
@@ -289,8 +289,8 @@ estudio y `decisiones.md`.
 
 | Tarea | Fecha | Modelo recomendado | Modelo usado | Estado | Commit |
 |---|---|---|---|---|---|
-| T0 | 2026-10-12 | Opus (modo plan) | Opus | Terminada, espera OK | — |
-| T1 | | Sonnet | | Pendiente | |
+| T0 | 2026-10-12 | Opus (modo plan) | Opus | Terminada (OK recibido) | `500aab5` |
+| T1 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada, espera verificación | (este commit) |
 | T2 | | Sonnet | | Pendiente | |
 | T3 | | Sonnet | | Pendiente | |
 | T4 | | Opus | | Pendiente | |
@@ -304,3 +304,56 @@ estudio y `decisiones.md`.
 - Datos: 2111 filas crudas → 2087 sin duplicados.
 - Discrepancias con las referencias: Árbol A F1 0.9362 (no 0.938), KNN A F1 0.8075 (no 0.814),
   KNN B F1 0.7567 (no 0.764). Detalle en §0.2.
+
+### T1 — Resultados de la Entrega 1 congelados
+
+**Entorno**: `.venv` con Python 3.13.16, scikit-learn 1.9.1, pandas 3.0.6, numpy 2.5.4,
+matplotlib 3.11.2. Se instaló `requirements.txt` sin PyQt5, que solo hace falta para abrir
+ventanas.
+
+**Re-ejecución de verificación** (`e02 --paso 3 3.6 4 4.1` y `e03 --paso 2`, sin `--guardar`;
+`git status` limpio después). Los 10 modelos reproducen **exactamente** las cifras de
+`resultados_texto/`. Los mejores hiperparámetros salieron por consola; no están en
+`resultados_texto/` y por eso se anotan aquí y no en el CSV:
+
+| Tarea | Árbol | Random Forest | KNN |
+|---|---|---|---|
+| clasificación A | max_depth=None, min_samples_leaf=1 | n_estimators=400, max_depth=None, min_samples_leaf=1 | k=1, uniform |
+| clasificación B | max_depth=None, min_samples_leaf=1 | n_estimators=200, max_depth=None, min_samples_leaf=1 | k=3, distance |
+| regresión | max_depth=12, min_samples_leaf=10 | n_estimators=400, max_depth=None, min_samples_leaf=1 | k=3, distance |
+
+**`data/resultados_entrega1.csv`**: 14 filas, generadas con `python -m src.resultados --congelar-entrega1`.
+El script lee las tablas de `resultados_texto/`, no tiene ningún número escrito a mano y no
+sobrescribe el CSV si ya existe (sin `--forzar`).
+
+| tarea | modelo | accuracy | macro-F1 | cv | MAE | RMSE | R² | R²adj |
+|---|---|---|---|---|---|---|---|---|
+| clasificacion_A | Árbol de decisión | 0.9378 | 0.9362 | 0.9230 | | | | |
+| clasificacion_A | Random Forest | 0.9569 | 0.9558 | 0.9437 | | | | |
+| clasificacion_A | KNN | 0.8206 | 0.8075 | 0.8152 | | | | |
+| clasificacion_B | Árbol de decisión | 0.7464 | 0.7401 | 0.7440 | | | | |
+| clasificacion_B | Random Forest | 0.8565 | 0.8528 | 0.8506 | | | | |
+| clasificacion_B | KNN | 0.7679 | 0.7567 | 0.7640 | | | | |
+| regresion | Baseline (media) | | | — | 21.7064 | 25.9126 | −0.0001 | −0.0479 |
+| regresion | Árbol de regresión | | | 12.4728 | 6.5810 | 10.4655 | 0.8369 | 0.8291 |
+| regresion | Random Forest | | | 9.1156 | 4.8386 | 8.2468 | 0.8987 | 0.8939 |
+| regresion | KNN | | | 10.3709 | 5.0484 | 9.9085 | 0.8538 | 0.8468 |
+
+`clustering_nota` (silueta / ARI / NMI / pureza), marcado como **no comparable**:
+
+| Configuración | silueta | ARI | NMI | pureza |
+|---|---|---|---|---|
+| Sin clase (20 features) | 0.1315 | 0.0883 | 0.1575 | 0.3057 |
+| Solo numéricas (8) | 0.1647 | 0.1564 | 0.2618 | 0.3824 |
+| Con clase ordinal (fuga) | 0.1555 | 0.2520 | 0.3584 | 0.4255 |
+| Con clase one-hot (fuga) | 0.2279 | 0.9989 | 0.9984 | 0.9995 |
+
+**Cambios al esquema del plan**: se añadieron las columnas `silueta, ARI, NMI, pureza, nota`,
+que solo usan las filas de clustering. Tiempo, log-loss, nº de parámetros, nº de vectores de
+soporte y épocas quedan vacíos en la Entrega 1 porque no se re-entrena.
+
+**Hallazgo — dos tests distintos de 418 filas.** `huella_test` vale `8d9af7b40ee9` en
+clasificación y `021799f95367` en regresión. Es lo esperado: la Entrega 1 estratifica por
+clase en un caso y por deciles de Weight en el otro, así que son particiones distintas. Lo que
+garantiza la comparación es que **dentro de cada tarea** todos los modelos (E1 y E2) usen el
+mismo test. La etapa 09 lo comprueba por tarea.
