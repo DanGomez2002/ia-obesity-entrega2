@@ -3,7 +3,7 @@
 Cómo usarlo:
   1. Abre este archivo en VS Code y pulsa el botón ▶ "Run Python File" (arriba a la derecha),
      o en una terminal:  python main.py
-  2. Elige la etapa (1-5) y luego el paso (ej. 3.4). Las gráficas se abren en una ventana
+  2. Elige la etapa (1-9) y luego el paso (ej. 3.4). Las gráficas se abren en una ventana
      (ciérrala para continuar) y las tablas salen en la consola. No se escriben archivos;
      para guardar PNG en figures/ activa [g] en el menú o usa run_all.py.
 
@@ -23,11 +23,16 @@ ETAPAS = {}
 
 
 def _cargar_etapas():
-    """Importa las 5 etapas (import perezoso: así el menú arranca rápido)."""
+    """Importa las 9 etapas (import perezoso: así el menú arranca rápido).
+
+    01-05 son la Entrega 1; 06-09 la Entrega 2 (Naive Bayes, SVM, redes neuronales y la
+    comparación final)."""
     if not ETAPAS:
         from etapas import (e01_eda, e02_clasificacion, e03_regresion, e04_clustering,
-                            e05_comparacion)
-        for mod in (e01_eda, e02_clasificacion, e03_regresion, e04_clustering, e05_comparacion):
+                            e05_comparacion, e06_naive_bayes, e07_svm, e08_redes_neuronales,
+                            e09_comparacion_final)
+        for mod in (e01_eda, e02_clasificacion, e03_regresion, e04_clustering, e05_comparacion,
+                    e06_naive_bayes, e07_svm, e08_redes_neuronales, e09_comparacion_final):
             ETAPAS[mod.etapa.numero] = mod.etapa
     return ETAPAS
 
@@ -63,14 +68,14 @@ def menu_principal():
             salida.OPCIONES["graficar_tablas"] = not salida.OPCIONES["graficar_tablas"]
         elif eleccion == "c":
             cache.limpiar()
-        elif eleccion in ("1", "2", "3", "4", "5"):
+        elif eleccion in tuple("123456789"):
             etapas["0" + eleccion].menu()
         else:
             print("Opción no válida.")
 
 
 def ejecutar_todo():
-    """Corre las 5 etapas completas sin abrir ventanas (sólo guarda PNG)."""
+    """Corre las 9 etapas completas sin abrir ventanas (sólo guarda PNG)."""
     mostrar_antes, guardar_antes = salida.OPCIONES["mostrar"], salida.OPCIONES["guardar"]
     salida.configurar(mostrar=False, guardar=True)
     for et in _cargar_etapas().values():

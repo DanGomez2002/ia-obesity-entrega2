@@ -5,7 +5,7 @@ Este plan amplía el proyecto de la Entrega 1 **con su misma estructura**: la ve
 de `etapas/` + pasos numerados (`src/pasos.py`), con salidas en `figures/` y `resultados_texto/`
 y ejecución completa con `run_all.py`.
 
-Estado: **T5 terminada. Espera tu verificación para empezar T7.**
+Estado: **T7 terminada: todas las tareas cerradas. Espera tu verificación final.**
 
 ---
 
@@ -294,8 +294,8 @@ estudio y `decisiones.md`.
 | T2 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada (OK recibido) | `c56fe7d` |
 | T3 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada (OK recibido) | `f7a96a0` |
 | T4 | 2026-10-12 | Opus | Opus | Terminada (OK recibido) | `d9c6c32` |
-| T5 | 2026-10-12 | Opus | Opus | Terminada, espera verificación | (este commit) |
-| T7 | | Opus | | Pendiente | |
+| T5 | 2026-10-12 | Opus | Opus | Terminada (OK recibido) | `60baf41` |
+| T7 | 2026-10-12 | Opus | Opus | Terminada, espera verificación | (este commit) |
 
 ### T0 — Inspección
 
@@ -449,8 +449,9 @@ mismas métricas en todas.
 | **rbf** ← elegido | C=1, gamma=0.1, epsilon=0.05 | **9.4351** | 6.2617 | **10.0951** | 0.8482 | 0.8410 | 1250 |
 
 `epsilon` de SVR está en desviaciones típicas del peso, porque el target se estandariza. Los
-tiempos de `refit` del modelo elegido son unos 0.1 s; el lineal tarda más (1.1 s en A, 4.3 s
-en B, 1.2 s en regresión). Las cifras exactas están en `resultados_texto/07_svm/`.
+tiempos de `refit` del modelo elegido son unos 0.1 s; el lineal tarda más (≈1 s en A, ≈4 s en B
+y ≈1 s en regresión). Los tiempos varían entre ejecuciones; los exactos de la ejecución final
+están en `resultados_texto/07_svm/`.
 
 **Vectores de soporte (paso 3.4)**
 
@@ -488,6 +489,9 @@ en B, 1.2 s en regresión). Las cifras exactas están en `resultados_texto/07_sv
      - SVR-linear epsilon=0.75: 18.04; epsilon=1.0: 18.30.
    - Por esas pruebas se añadieron rbf C=1e6 y gamma=1e-5, poly degree=5 y SVR epsilon=1.0, y
      ya son interiores.
+   - **Reproducible desde T7**: el paso 2.1 de la etapa 07 recalcula estas pruebas. Muestra la
+     superficie C × gamma del rbf de A, la curva de epsilon del SVR lineal y los valores fuera
+     de la grilla. Los resultados están en `resultados_texto/07_svm/2.1.md`.
    - **Excepción, linear C ≤ 1000**: C=10000 empeora A y en B un solo ajuste pasaba de 10
      minutos. Queda documentado que el óptimo C=1000 de linear-A está en el borde de la grilla
      pero es un máximo verificado.
@@ -668,3 +672,66 @@ Regresión, por RMSE (kg):
 columnas no numéricas; antes fallaba con la columna `mejores_params`. Como las etapas 06-08
 importan `src/resultados.py`, su caché se recalculará en la próxima ejecución, la de T7. Sus
 números no deberían cambiar, y T7 lo comprobará.
+
+### T7 — Verificación final
+
+**Cambios**
+- `main.py`: el menú carga las 9 etapas (opciones 1-9).
+- `run_all.py`: ejecuta las 9 etapas, con la opción `--etapas 06 07 08 09` para correr solo
+  algunas; valida los números de etapa.
+- `tests/test_entrega2.py`: 11 pruebas que no entrenan nada.
+  - Numeración y pasos únicos; parámetros declarados que apuntan a su definición.
+  - `run_all` y `main` conocen las 9 etapas.
+  - Esquema común de los CSV; la E1 congelada coincide con `resultados_texto/`.
+  - Una sola huella de 418 por tarea y una fila por familia y tarea.
+  - `leer_tabla_md` con columnas de texto.
+  - La validación de la red sale del train (1418 + 251 = train; test disjunto).
+- `etapas/e07_svm.py`: nuevo paso 2.1, "Bordes de la grilla". Hace reproducibles las pruebas
+  fuera de la grilla que en T3 se habían corrido a mano.
+
+**`python run_all.py --limpiar-cache` completo**: exit 0, las 9 etapas en 1574 s.
+
+| Etapa | 01 | 02 | 03 | 04 | 05 | 06 | 07 | 08 | 09 |
+|---|---|---|---|---|---|---|---|---|---|
+| Tiempo (s) | 4 | 81 | 252 | 27 | 5 | 14 | 507 | 682 | 2 |
+
+Después, con el paso 2.1 añadido, `run_all.py --etapas 07 09`: exit 0, la 07 en 525 s.
+
+**Reproducibilidad desde cero (diff numérico archivo a archivo contra lo versionado)**
+- **Entrega 2 (06-09)**: idéntica salvo las columnas de **tiempo**, incluidos los 45
+  entrenamientos de redes. Por ejemplo, el RMSE de la red de regresión es
+  `11.676357233131657` en las dos ejecuciones. En `data/resultados_entrega2.csv` cambian
+  exactamente las 8 celdas de tiempo. Se versionan las salidas de esta ejecución final.
+- **Entrega 1 (01-05)**: las métricas congeladas (tablas de los pasos 3 y 4 de la etapa 02,
+  paso 2 de la 03 y clustering de la 05) son **idénticas**. Hay diferencias pequeñas en
+  análisis secundarios que **no entran en la comparación**:
+  - Etapa 02, paso 8 (filas reales, CV 3×10): macro-F1 0.194203 → 0.194181 y
+    0.395685 → 0.395671.
+  - Etapa 03, paso 9 (filas reales): RMSE 17.4617 → 17.4598 y 12.8886 → 12.8864;
+    R² −0.0631 → −0.0629.
+  - Tiempos de los pasos 3.7 y 2.2.
+  - `04_clustering/4.4.md` gana una sección de datos que la versión versionada no tenía.
+  - Los CSV de puntos PCA solo difieren en la representación de los decimales.
+
+  La causa probable son versiones de librería distintas a las del entorno donde se generó la
+  E1. Aquí: scikit-learn 1.9.1, pandas 3.0.6, numpy 2.5.4, scipy 1.18.1. **Como la E1 no se
+  modifica, sus salidas se restauraron a la versión versionada.**
+
+**Tests**: `pytest tests/test_entrega2.py tests/test_cli.py tests/test_cache.py
+tests/test_sin_postpoda.py` → **27 passed**.
+- No se ejecutaron `test_app_smoke`, `test_modelos`, `test_clustering` ni `test_navegacion`:
+  importan o ejecutan la app (`webapp/`), que está fuera de alcance.
+- `estudio_etapas.html` y `webapp/` no se tocaron.
+
+**Números de esta bitácora frente a las salidas**: un script compara cada número decimal de
+las secciones T1-T7 con `resultados_texto/**/*.md` y con los logs de las ejecuciones
+completas. El resultado está al final de esta sección.
+
+**Resultado del contraste**: de 433 números decimales en la bitácora, **427 aparecen en las
+salidas ejecutadas**. Los 6 restantes están justificados:
+- `3.13` y `3.11` (dos veces) son versiones de Python y matplotlib, no resultados.
+- `11.676357233131657` está en `data/resultados_entrega2.csv`, que el script no lee.
+- `0.194181` y `0.395671` salen de la regeneración de la E1 que se descartó al restaurarla;
+  el log solo los imprime redondeados (0.1942 y 0.3957).
+
+Ninguna cifra de la bitácora es una estimación.

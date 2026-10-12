@@ -25,7 +25,7 @@ Protocolo (el de las etapas 02 y 03, reutilizando sus splits):
 
 Pasos:
   1    Datos y split (clasificación y regresión)
-  2    Modelos y grillas por kernel
+  2    Modelos y grillas por kernel      2.1  Bordes de la grilla (CV fuera del óptimo)
   3    Clasificación A: tabla por kernel          4    Clasificación B: tabla por kernel
   3.1  A: reportes y matrices de los 3 kernels    4.1  B: reportes y matrices
   3.2  ¿Por qué el kernel lineal compite en A?    5    Comparación A vs B
@@ -47,7 +47,7 @@ from sklearn.compose import TransformedTargetRegressor
 from sklearn.decomposition import PCA
 from sklearn.dummy import DummyRegressor
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
-from sklearn.model_selection import GridSearchCV, KFold
+from sklearn.model_selection import GridSearchCV, KFold, cross_val_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, StandardScaler
 from sklearn.svm import SVC, SVR
@@ -256,6 +256,71 @@ def paso_2_modelos():
                 print(f"   {k.split('__')[-1]}: {v}")
             n = int(np.prod([len(v) for v in grid.values()]))
             print(f"   ({n} combinaciones × 5 folds = {n * 5} ajustes)")
+
+
+def _bordes():
+    """macro-F1 / RMSE de CV de valores MÁS ALLÁ de los bordes de la grilla final, con el resto
+    de hiperparámetros fijos en el óptimo: comprueba que el óptimo no sigue mejorando fuera."""
+    d, dr = e02.datos(), e03.datos()
+    XA, XB, y = d["X_train"], d["X_train"].drop(columns=e02.DROP_WH), d["y_train"]
+    cv_r = KFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
+    casos = [
+        ("A", "linear", {"svc__C": 3000}), ("A", "linear", {"svc__C": 10000}),
+        ("A", "rbf", {"svc__C": 1e7, "svc__gamma": 1e-5}),
+        ("B", "poly", {"svc__C": 1, "svc__coef0": 1, "svc__gamma": "scale", "svc__degree": 6}),
+        ("B", "poly", {"svc__C": 1, "svc__coef0": 1, "svc__gamma": "scale", "svc__degree": 7}),
+        ("reg", "linear", {"regressor__svr__C": 10, "regressor__svr__epsilon": 0.75}),
+    ]
+    filas = []
+    for tarea, kernel, params in casos:
+        if tarea == "reg":
+            modelo = make_models_reg()[kernel][0].set_params(**params)
+            s = -cross_val_score(modelo, dr["X_train"], dr["y_train"], cv=cv_r,
+                                 scoring="neg_root_mean_squared_error", n_jobs=-1).mean()
+        else:
+            modelo = make_models()[kernel][0].set_params(**params)
+            s = cross_val_score(modelo, XA if tarea == "A" else XB, y, cv=e02.cv_estratificado(),
+                                scoring="f1_macro", n_jobs=-1).mean()
+        filas.append({"tarea": tarea, "kernel": kernel,
+                      "params probados": str({k.split("__")[-1]: v for k, v in params.items()}),
+                      "cv (macro-F1; reg: RMSE)": s})
+    return pd.DataFrame(filas)
+
+
+@etapa.paso("2.1", "Bordes de la grilla: la CV empeora al ir más allá del óptimo",
+            parametros=("make_models", "make_models_reg", "_bordes"))
+def paso_2_1_bordes():
+    fA, tA, _, _ = variante("A")
+    _, tB, _, _ = variante("B")
+    _, tR = modelos_reg()
+    r = pd.DataFrame(fA["rbf"].cv_results_)
+    piv = r.pivot_table(index="param_svc__C", columns=r["param_svc__gamma"].astype(str),
+                        values="mean_test_score")
+    tabla(piv, "Clasificación A, SVC rbf: macro-F1 de CV por C (filas) y gamma (columnas)", 4,
+          grafica=False)
+    rr = pd.DataFrame(modelos_reg()[0]["linear"].cv_results_)
+    rr = rr[rr["param_regressor__svr__C"] == 10]
+    tabla(pd.Series(-rr["mean_test_score"].to_numpy(),
+                    index=rr["param_regressor__svr__epsilon"].astype(float), name="RMSE de CV"),
+          "Regresión, SVR linear con C=10: RMSE de CV según epsilon (grilla)", 4, grafica=False)
+    ref = pd.DataFrame([
+        {"tarea": "A", "kernel": "linear", "params probados": f"óptimo de la grilla {_params(fA['linear'])}",
+         "cv (macro-F1; reg: RMSE)": tA.loc["linear", "cv_f1_macro"]},
+        {"tarea": "A", "kernel": "rbf", "params probados": f"óptimo de la grilla {_params(fA['rbf'])}",
+         "cv (macro-F1; reg: RMSE)": tA.loc["rbf", "cv_f1_macro"]},
+        {"tarea": "B", "kernel": "poly", "params probados": "óptimo de la grilla (degree=5)",
+         "cv (macro-F1; reg: RMSE)": tB.loc["poly", "cv_f1_macro"]},
+        {"tarea": "reg", "kernel": "linear", "params probados": "óptimo de la grilla (epsilon=0.5)",
+         "cv (macro-F1; reg: RMSE)": tR.loc["linear", "cv_RMSE"]}])
+    fuera = cache.obtener("svm_bordes", _bordes)
+    tabla(pd.concat([ref, fuera], ignore_index=True).set_index(["tarea", "kernel", "params probados"]),
+          "Óptimo de la grilla frente a valores fuera de ella (CV de 5 folds)", 4, grafica=False)
+    nota("""
+    La grilla final se amplió en tres pasadas hasta que ningún óptimo quedara pegado a un borde
+    sin comprobar. Dos quedan en el borde a propósito: linear en A (C=1000), porque más allá la
+    CV baja y en la variante B un ajuste con C=10000 tarda más de 10 minutos; y poly en B
+    (degree=5), donde los grados 6 y 7 forman una meseta (±0.001) y rbf gana de todos modos.
+    """)
 
 
 # ----------------------------------------------------------------------------
