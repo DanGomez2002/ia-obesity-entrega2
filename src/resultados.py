@@ -123,8 +123,11 @@ def _formato(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def leer(ruta) -> pd.DataFrame:
-    """Lee un CSV de resultados con las columnas en el orden común."""
-    return _formato(pd.read_csv(ruta))
+    """Lee un CSV de resultados con las columnas en el orden común.
+
+    float_precision="round_trip": relee cada número exactamente como se escribió; sin eso, al
+    reescribir el archivo los valores de OTRAS etapas podían cambiar en el último dígito."""
+    return _formato(pd.read_csv(ruta, float_precision="round_trip"))
 
 
 def guardar_entrega2(filas: list, etapa: str) -> pd.DataFrame:
