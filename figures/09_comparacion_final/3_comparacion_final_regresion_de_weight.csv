@@ -1,5 +1,5 @@
 categoria,valor
-"Red neuronal [128, 64, 32]",11.676357233131656
+"Red neuronal [128, 64, 32]",11.676357233131657
 Árbol de regresión,10.4655
 SVM (SVR rbf),10.0951
 KNN,9.9085

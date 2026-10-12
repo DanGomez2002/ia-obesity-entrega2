@@ -727,11 +727,35 @@ tests/test_sin_postpoda.py` → **27 passed**.
 las secciones T1-T7 con `resultados_texto/**/*.md` y con los logs de las ejecuciones
 completas. El resultado está al final de esta sección.
 
-**Resultado del contraste**: de 433 números decimales en la bitácora, **427 aparecen en las
-salidas ejecutadas**. Los 6 restantes están justificados:
-- `3.13` y `3.11` (dos veces) son versiones de Python y matplotlib, no resultados.
-- `11.676357233131657` está en `data/resultados_entrega2.csv`, que el script no lee.
-- `0.194181` y `0.395671` salen de la regeneración de la E1 que se descartó al restaurarla;
-  el log solo los imprime redondeados (0.1942 y 0.3957).
+**Fallo encontrado y corregido durante la verificación (commit `5acf985`)**:
+`resultados.leer()` no releía los CSV de forma exacta. Al reescribir
+`data/resultados_entrega2.csv`, los valores de otras etapas cambiaban en el último dígito
+(p. ej. 11.676357233131657 → …656, ~2·10⁻¹⁵). Se corrigió con
+`pd.read_csv(..., float_precision="round_trip")`: ahora la relectura es exacta, comprobado
+escribiendo y releyendo el CSV completo.
 
-Ninguna cifra de la bitácora es una estimación.
+**Ejecución final con el código definitivo**: `python run_all.py --etapas 06 07 08 09`, exit 0.
+
+| Etapa | 06 | 07 | 08 | 09 |
+|---|---|---|---|---|
+| Tiempo (s) | 16 | 524 | 682 | 2 |
+
+Las etapas 01-05 no dependen de `src/resultados.py` y sus salidas son las versionadas de la E1.
+Comparando **celda a celda** todas las tablas CSV de `resultados_texto/06-09` y
+`data/resultados_entrega2.csv` con la versión anterior, **solo cambian columnas de tiempo**:
+`tiempo_fit_s`, `tiempo_entrenamiento_s`, `tiempo_s`, `tiempo medio (s)` y
+`tiempo de entrenamiento (s)`. El RMSE de la red de regresión vuelve a ser exactamente
+`11.676357233131657`. Tras la ejecución, `pytest` (los mismos 4 archivos) → **27 passed**.
+
+**Resultado del contraste de números** (bitácora frente a `resultados_texto/` final y el log
+de la ejecución final): todos los números decimales de T1-T7 aparecen en las salidas excepto
+estos, que están justificados:
+- `3.13` y `3.11` son versiones de Python y matplotlib, no resultados.
+- `11.676357233131657` está en `data/resultados_entrega2.csv`, que el script no lee.
+- `0.194181`, `0.395671`, `17.4598`, `12.8864` y `−0.0629` son de la regeneración de la E1
+  que se descartó al restaurarla; están en el log de esa ejecución (`run_all --limpiar-cache`),
+  no en las salidas versionadas.
+
+Ningún número de la bitácora es una estimación. Los tiempos citados en las secciones T2-T4
+son aproximados y varían entre ejecuciones; los exactos de la última ejecución están en
+`resultados_texto/`.
