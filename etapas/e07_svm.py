@@ -296,13 +296,13 @@ def _por_que_lineal():
         gs = GridSearchCV(modelo, grid, cv=e02.cv_estratificado(), scoring="f1_macro", n_jobs=-1)
         gs.fit(X, d["y_train"])
         filas[nombre] = {"cv_f1_macro": gs.best_score_, "mejores_params": str(_params(gs))}
-    return pd.DataFrame(filas).T
+    return pd.DataFrame.from_dict(filas, orient="index")
 
 
 @etapa.paso("3.2", "¿Por qué el kernel lineal compite en A? (la fuga hace la clase casi lineal)",
             parametros=("make_models", "_por_que_lineal"))
 def paso_3_2_por_que_lineal():
-    _, tA, _, _ = variante("A")
+    fA, tA, _, _ = variante("A")
     _, tB, _, _ = variante("B")
     hueco = pd.DataFrame({
         "linear (cv)": [tA.loc["linear", "cv_f1_macro"], tB.loc["linear", "cv_f1_macro"]],
@@ -324,8 +324,16 @@ def paso_3_2_por_que_lineal():
     B, donde, sin Weight/Height, la relación de los hábitos con la clase no tiene esa forma.
     Con sólo dos atributos, el SVC lineal sobre (log Weight, log Height) logra macro-F1 de CV
     {sol.iloc[1, 0]:.4f}, frente a {sol.iloc[0, 0]:.4f} en kg/m y {sol.iloc[2, 0]:.4f} con rbf.
-    Las clases no son cortes perfectos del IMC (sus rangos se solapan, etapa 06 paso 1.1), lo
-    que pone un techo a cualquier frontera basada sólo en Weight y Height.
+    Y un rbf con sólo esos dos atributos llega a {sol.iloc[2, 0]:.4f}, frente a
+    {tA.loc["rbf", "cv_f1_macro"]:.4f} del SVC rbf con las 20 features: en la variante A casi todo
+    el rendimiento sale de Weight y Height. Las clases no son cortes perfectos del IMC (sus
+    rangos se solapan, etapa 06 paso 1.1), lo que pone un techo a cualquier frontera basada sólo
+    en Weight y Height.
+
+    El rbf elegido en A también apunta a lo mismo: {_params(fA["rbf"])}. Con gamma muy pequeño
+    cada punto "alcanza" a casi todos los demás y la frontera se vuelve muy suave; compensado
+    con un C enorme, el rbf se comporta prácticamente como un clasificador lineal. Por eso su
+    óptimo se desplaza hacia la esquina C grande / gamma pequeño de la grilla.
     """)
 
 
@@ -366,7 +374,8 @@ def paso_3_3_frontera_pca():
     fig.legend(handles=handles, loc="lower center", ncol=7, fontsize=9, bbox_to_anchor=(0.5, -0.04))
     fig.suptitle("Fronteras de los 3 kernels en el plano PCA de la variante A (puntos = test)", y=1.01)
     etapa.figura(fig, "3.3_frontera_pca")
-    tabla(pd.DataFrame(filas).T, "SVC reentrenado sobre 2 componentes PCA (sólo para visualizar)",
+    tabla(pd.DataFrame.from_dict(filas, orient="index"),
+          "SVC reentrenado sobre 2 componentes PCA (sólo para visualizar)",
           grafica=False)
     nota(f"""
     Esta figura es SÓLO una visualización: cada SVC se reentrena con las 2 primeras componentes
@@ -456,7 +465,7 @@ def paso_6_regresion():
           mejor_kernel(t.drop(index="Baseline (media)"), "cv_RMSE", mayor=False))
 
 
-@etapa.paso("6.1", "Regresión: predicho vs real y residuos de los 3 kernels", figuras=2,
+@etapa.paso("6.1", "Regresión: predicho vs real, residuos y extrapolación de los 3 kernels", figuras=2,
             parametros=("make_models_reg",))
 def paso_6_1_pred_vs_real():
     fitted, t = modelos_reg()
@@ -478,6 +487,25 @@ def paso_6_1_pred_vs_real():
                      f"  R²adj={t.loc[k, 'test_R2_adj']:.3f}")
     etapa.figura(fig, "6.1_pred_vs_real_svr")
     etapa.figura(plot_residuos_vs_pred(y_te, preds), "6.1_residuos_vs_predicho_svr")
+
+    # Predicciones fuera del rango de pesos visto en el train (extrapolación)
+    y_tr = d["y_train"]
+    fuera = pd.DataFrame.from_dict({nombre: {
+        "pred. mínima (kg)": p.min(), "pred. máxima (kg)": p.max(),
+        "fuera de [mín, máx] del train": int(((p < y_tr.min()) | (p > y_tr.max())).sum()),
+        "residuo máx. |kg|": np.abs(y_te.to_numpy() - p).max(),
+    } for nombre, p in preds.items()}, orient="index")
+    tabla(fuera, f"Extrapolación: predicciones fuera del rango del train "
+                 f"[{y_tr.min():.1f}, {y_tr.max():.1f}] kg", 2)
+    nota(f"""
+    El kernel poly tiene mejor RMSE de CV que el lineal ({t.loc["poly", "cv_RMSE"]:.2f} frente a
+    {t.loc["linear", "cv_RMSE"]:.2f} kg) pero peor en test ({t.loc["poly", "test_RMSE"]:.2f} frente a
+    {t.loc["linear", "test_RMSE"]:.2f} kg). La tabla muestra por qué: un polinomio crece sin límite
+    fuera de la zona donde hay datos de entrenamiento, y unas pocas filas del test producen
+    predicciones absurdas (un peso negativo o muy por encima del máximo observado). El RMSE eleva
+    al cuadrado esos errores, así que unas pocas predicciones disparatadas bastan para empeorarlo.
+    El rbf no tiene ese problema: lejos de los datos su predicción tiende a la media.
+    """)
 
 
 # ----------------------------------------------------------------------------

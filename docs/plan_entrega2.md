@@ -5,7 +5,7 @@ Este plan amplía el proyecto de la Entrega 1 **con su misma estructura**: la ve
 de `etapas/` + pasos numerados (`src/pasos.py`), con salidas en `figures/` y `resultados_texto/`
 y ejecución completa con `run_all.py`.
 
-Estado: **T2 terminada. Espera tu verificación para empezar T3.**
+Estado: **T3 terminada. Espera tu verificación para empezar T4.**
 
 ---
 
@@ -291,8 +291,8 @@ estudio y `decisiones.md`.
 |---|---|---|---|---|---|
 | T0 | 2026-10-12 | Opus (modo plan) | Opus | Terminada (OK recibido) | `500aab5` |
 | T1 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada (OK recibido) | `2267801` |
-| T2 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada, espera verificación | (este commit) |
-| T3 | | Sonnet | | Pendiente | |
+| T2 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada (OK recibido) | `c56fe7d` |
+| T3 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada, espera verificación | (este commit) |
 | T4 | | Opus | | Pendiente | |
 | T5 | | Opus | | Pendiente | |
 | T7 | | Opus | | Pendiente | |
@@ -414,3 +414,91 @@ es el de la etapa 02 (1669/418, huella `8d9af7b40ee9`, la misma que en la E1).
 - `src/resultados.py`: nueva función `guardar_entrega2(filas, etapa)`. Reemplaza las filas
   previas de la misma etapa y solo escribe con `--guardar` o `run_all.py`, la misma convención
   que las tablas y figuras.
+
+### T3 — Etapa 07, SVM (SVC y SVR)
+
+Ejecución: `python etapas/e07_svm.py --todo --guardar --sin-ventanas`. Sin errores, 13 pasos,
+unos 8 minutos sin caché. Salidas en `resultados_texto/07_svm/` y `figures/07_svm/`. Los
+splits son los de E1: clasificación con huella `8d9af7b40ee9` y regresión con `021799f95367`.
+Re-ejecutada desde cero tres veces con las grillas finales: los mismos hiperparámetros y las
+mismas métricas en todas.
+
+**Clasificación A (todas las features)**
+
+| kernel | mejores params (CV) | cv macro-F1 | test acc | test macro-F1 | nº SV |
+|---|---|---|---|---|---|
+| linear | C=1000 | 0.9599 | 0.9689 | 0.9675 | 239 |
+| poly | C=100, degree=3, gamma=0.01, coef0=1 | 0.9508 | 0.9569 | 0.9546 | 546 |
+| **rbf** ← elegido | C=1e5, gamma=1e-4 | **0.9650** | 0.9689 | **0.9678** | 312 |
+
+**Clasificación B (sin Weight/Height)**
+
+| kernel | mejores params (CV) | cv macro-F1 | test acc | test macro-F1 | nº SV |
+|---|---|---|---|---|---|
+| linear | C=100 | 0.6235 | 0.6411 | 0.6091 | 1182 |
+| poly | C=1, degree=5, gamma=scale, coef0=1 | 0.7821 | 0.7799 | 0.7705 | 934 |
+| **rbf** ← elegido | C=10, gamma=0.1 | **0.7964** | 0.7871 | **0.7830** | 998 |
+
+**Regresión de Weight (test, kg; R²adj con p = 19)**
+
+| kernel | mejores params (CV) | cv RMSE | MAE | RMSE | R² | R²adj | nº SV |
+|---|---|---|---|---|---|---|---|
+| Baseline (media) | — | — | 21.7064 | 25.9126 | −0.0001 | −0.0479 | — |
+| linear | C=10, epsilon=0.5 | 17.9842 | 14.1639 | 17.3358 | 0.5524 | 0.5310 | 752 |
+| poly | C=1, degree=3, gamma=scale, epsilon=0.3 | 15.9654 | 11.7900 | 18.3846 | 0.4966 | 0.4725 | 874 |
+| **rbf** ← elegido | C=1, gamma=0.1, epsilon=0.05 | **9.4351** | 6.2617 | **10.0951** | 0.8482 | 0.8410 | 1250 |
+
+`epsilon` de SVR está en desviaciones típicas del peso, porque el target se estandariza. Los
+tiempos de `refit` del modelo elegido son unos 0.1 s; el lineal tarda más (1.1 s en A, 4.3 s
+en B, 1.2 s en regresión). Las cifras exactas están en `resultados_texto/07_svm/`.
+
+**Vectores de soporte (paso 3.4)**
+
+| Modelo elegido | Vectores de soporte | % del train |
+|---|---|---|
+| SVC rbf A | 312 de 1669 | 18.7 % |
+| SVC rbf B | 998 de 1669 | 59.8 % (Normal_Weight: 93.8 % de su clase) |
+| SVR rbf | 1250 de 1669 | 74.9 % (tubo estrecho, epsilon = 0.05) |
+
+**Hallazgos (reportados tal cual)**
+
+1. **En A el kernel lineal compite**: CV 0.9599, frente a 0.9650 de rbf (hueco +0.0051). En B
+   el hueco es +0.1729. En test, linear y rbf empatan en accuracy (0.9689) y casi en macro-F1
+   (0.9675 frente a 0.9678).
+   - Paso 3.2: un SVC con **solo Weight y Height** logra CV 0.9484 (linear en kg/m), 0.9505
+     (linear en logaritmos) y **0.9650 (rbf), igual que el SVC rbf con las 20 features**. En A,
+     casi todo el rendimiento sale de la fuga del IMC.
+   - El rbf elegido en A (C=1e5, gamma=1e-4) está en el régimen "gamma pequeño / C grande",
+     donde se comporta casi como un clasificador lineal.
+2. **El SVM supera en A al mejor modelo de la E1**: SVC rbf 0.9678 frente a RF 0.9558 de
+   macro-F1 en test. En B y en regresión **no**: B 0.7830 frente a RF 0.8528, y regresión
+   RMSE 10.10 frente a RF 8.25 y KNN 9.91. La interpretación es de T5.
+3. **SVR poly: mejor CV que linear pero peor test**, por extrapolación (tabla del paso 6.1):
+   - SVR poly predice entre **−39.95 kg y 254.26 kg**; el rango del train es [39.4, 173.0] kg.
+   - 18 predicciones caen fuera de ese rango y el residuo máximo es 142.26 kg.
+   - Como comparación, linear tiene 12 fuera de rango (residuo máximo 47.14) y rbf solo 1
+     (residuo máximo 49.45).
+4. **Grillas: tres pasadas hasta que ningún óptimo quedara en el borde** (anotado en el código):
+   - 1.ª pasada: bordes en linear-B C=100, poly-A C=100, poly-B degree=3 y gamma=0.1,
+     rbf-A C=1000 y gamma=0.001, y en SVR (epsilon=0.2 en linear y poly, C=0.1 en poly).
+   - 2.ª pasada: quedaban linear-A C=1000, rbf-A C=1e5 / gamma=1e-4, poly-B degree=4 y
+     SVR-linear epsilon=0.5. Se probó **fuera de la grilla** y todo era peor:
+     - linear-A C=3000: 0.9593; C=10000: 0.9547.
+     - rbf-A con (C, gamma) = (1e6, 1e-5), (1e6, 1e-4), (1e5, 1e-5) y (1e7, 1e-5): ≤ 0.9583.
+     - SVR-linear epsilon=0.75: 18.04; epsilon=1.0: 18.30.
+   - Por esas pruebas se añadieron rbf C=1e6 y gamma=1e-5, poly degree=5 y SVR epsilon=1.0, y
+     ya son interiores.
+   - **Excepción, linear C ≤ 1000**: C=10000 empeora A y en B un solo ajuste pasaba de 10
+     minutos. Queda documentado que el óptimo C=1000 de linear-A está en el borde de la grilla
+     pero es un máximo verificado.
+   - **poly-B degree=5 sigue en el borde**: degree 6 y 7 dan 0.7818 y 0.7829 (meseta ±0.001) y
+     rbf gana por 0.014, así que no cambia la elección.
+   - **Recortes en SVR** por coste: poly C=100 (unos 150 s por ajuste) y linear C=1000 (unos
+     150 s), ambos lejos del óptimo.
+5. **Frontera PCA (paso 3.3)**: PC1 + PC2 explican solo el 25.6 % de la varianza. La accuracy
+   en 2D es 0.404 (linear), 0.445 (poly) y 0.421 (rbf). Es solo visualización y así lo dice la
+   nota.
+
+**Código**: `etapas/e07_svm.py`, con `make_models` / `fit_evaluate` / `variante` para
+clasificación y `make_models_reg` / `_ajustar_reg` / `modelos_reg` para regresión, con los
+mismos nombres que `e02` y `e03`.
