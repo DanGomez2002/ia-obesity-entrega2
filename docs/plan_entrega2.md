@@ -5,7 +5,12 @@ Este plan amplía el proyecto de la Entrega 1 **con su misma estructura**: la ve
 de `etapas/` + pasos numerados (`src/pasos.py`), con salidas en `figures/` y `resultados_texto/`
 y ejecución completa con `run_all.py`.
 
-Estado: **T7 terminada: todas las tareas cerradas. Espera tu verificación final.**
+> **Nota (T8):** al terminar se quitó del proyecto todo lo de la Entrega 1 (etapas 01-05, sus
+> salidas, la app de Streamlit, `estudio_etapas.html` y `study/`), que sigue en el proyecto
+> anterior. De la Entrega 1 sólo queda `data/resultados_entrega1.csv`. Las secciones T0-T7
+> describen el proyecto tal como era en cada momento.
+
+Estado: **T8 terminada (proyecto sólo con la Entrega 2). Espera tu verificación para empezar T9.**
 
 ---
 
@@ -295,7 +300,9 @@ estudio y `decisiones.md`.
 | T3 | 2026-10-12 | Sonnet | Opus (no se cambió con /model) | Terminada (OK recibido) | `f7a96a0` |
 | T4 | 2026-10-12 | Opus | Opus | Terminada (OK recibido) | `d9c6c32` |
 | T5 | 2026-10-12 | Opus | Opus | Terminada (OK recibido) | `60baf41` |
-| T7 | 2026-10-12 | Opus | Opus | Terminada, espera verificación | (este commit) |
+| T7 | 2026-10-12 | Opus | Opus | Terminada (OK recibido) | `4814738` |
+| T8. Quitar la Entrega 1 del proyecto (conservar sólo sus resultados) | 2026-10-12 | Opus | Opus | Terminada, espera verificación | (este commit) |
+| T9. HTML visual de la Entrega 2 (`estudio_entrega2.html`) | | Sonnet | | Pendiente | |
 
 ### T0 — Inspección
 
@@ -759,3 +766,59 @@ estos, que están justificados:
 Ningún número de la bitácora es una estimación. Los tiempos citados en las secciones T2-T4
 son aproximados y varían entre ejecuciones; los exactos de la última ejecución están en
 `resultados_texto/`.
+
+### T8 — Quitar la Entrega 1 del proyecto
+
+Decisión del usuario: este proyecto contiene solo la Entrega 2. Lo de la Entrega 1 queda en
+su propio proyecto; aquí solo se conservan sus resultados congelados
+(`data/resultados_entrega1.csv`).
+
+**Eliminado (`git rm`; sigue en el historial)**
+- `etapas/e01`-`e05`, más `figures/` y `resultados_texto/` de 01-05 y `tablas_sueltas`
+  (K-Means).
+- La app de Streamlit: `app.py`, `webapp/`, `estudio_etapas.html` y `study/`.
+- Sus tests: `test_app_smoke`, `test_modelos`, `test_clustering`, `test_navegacion` y
+  `test_sin_postpoda`.
+- De `requirements.txt`: `streamlit`.
+- Helpers que solo usaba la E1:
+  - En `src/evaluation.py`: `tree_summary`, `plot_k_curve`, `plot_n_estimators_curve`,
+    `plot_pred_vs_real` y los colores de las curvas.
+  - En `src/salida.py`: `RECEPTOR` (gancho de la app).
+  - En `src/resultados.py`: `construir_entrega1` / `congelar_entrega1`.
+  - En `src/data.py`: los CSV intermedios `clf.csv` / `reg.csv`.
+
+**Movido sin cambiar la lógica**
+- Las etapas 06-08 usaban el split de `e02`/`e03`. Ahora está en **`src/splits.py`**
+  (`datos_clf`, `datos_reg`, `cv_estratificado`, `DROP_WH`, `filas_reales`), copiado línea a
+  línea.
+- Comprobado antes de borrar: `X_train`, `X_test`, `y_train` e `y_test` son iguales
+  (`DataFrame.equals`) a los de `e02.datos()` / `e03.datos()`; huellas `8d9af7b40ee9` y
+  `021799f95367`; 491 filas reales en ambos casos.
+- `cargar_clf` / `cargar_reg` construyen siempre desde `data/obesity_raw.csv`. Comprobado: dan
+  valores idénticos a los del antiguo `clf.csv` / `reg.csv`.
+
+**Sustituido**
+- La comprobación "E1 congelada = `resultados_texto/` de la E1" ya no es posible. La etapa 09
+  ahora verifica la **huella SHA-256 del CSV congelado** (`HUELLA_E1 = 09d093c7…`), que no ha
+  cambiado desde T1 (commit `2267801`).
+
+**Actualizado**
+- `main.py` (menú 6-9), `run_all.py` (4 etapas), los ejemplos de `src/pasos.py`,
+  `src/cache.py`, `config.py` y `.gitignore`.
+- `tests/test_cli.py` y `tests/test_cache.py`: prueban lo mismo de antes sobre las etapas 06-09.
+- `tests/test_entrega2.py`: nuevas pruebas de que `src/splits.py` da los splits de la E1 y de
+  la huella del CSV congelado.
+
+**Verificación**
+- `pytest` (suite completa, ya sin nada que excluir) → **26 passed**.
+- `python run_all.py --limpiar-cache` (sin caché y sin salidas previas de 06-09): exit 0,
+  1208 s.
+
+| Etapa | 06 | 07 | 08 | 09 |
+|---|---|---|---|---|
+| Tiempo (s) | 15 | 522 | 668 | 2 |
+
+- Comparación celda a celda de las 39 tablas CSV de `resultados_texto/06-09` y de
+  `data/resultados_entrega2.csv` con la versión anterior: **solo cambian las columnas de
+  tiempo**. Ningún archivo nuevo ni desaparecido. Todas las métricas, hiperparámetros, nº de
+  vectores de soporte, épocas y conclusiones son idénticos.

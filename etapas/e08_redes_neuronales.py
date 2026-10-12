@@ -6,7 +6,7 @@ sus entradas más un sesgo y le aplica una función de activación; las capas oc
 max(0, z). Los pesos se ajustan por descenso de gradiente (Adam) minimizando una función de
 pérdida sobre el train; el gradiente se calcula por retropropagación.
 
-Diseño (las mismas tareas y variantes que las etapas 02, 03, 06 y 07):
+Diseño (las mismas tareas y variantes que las etapas 06 y 07 y que la Entrega 1):
 - Entradas: una neurona por atributo codificado — 20 en clasificación A, 18 en B (sin Weight
   ni Height) y 19 en regresión (sin NObeyesdad ni el propio Weight).
 - Clasificación: la clase se codifica 0-6 en el orden de CLASS_ORDER (de menor a mayor IMC);
@@ -20,7 +20,7 @@ Diseño (las mismas tareas y variantes que las etapas 02, 03, 06 y 07):
   en las curvas de pérdida train vs validación por época.
 
 Protocolo y garantías contra fugas:
-- Splits de las etapas 02 (clasificación) y 03 (regresión): mismos 1669 train / 418 test.
+- Splits de src/splits.py (los de la Entrega 1): mismos 1669 train / 418 test.
 - La validación para early stopping y para elegir arquitectura se saca SÓLO del train (15 %,
   estratificada, random_state=42): sub-train 1418 / validación 251. El test no se toca hasta
   la evaluación final.
@@ -67,21 +67,19 @@ import keras
 import tensorflow as tf
 
 from config import RANDOM_STATE
-from src import cache, resultados
+from src import cache, resultados, splits
 from src.evaluation import (clf_metrics, metricas_por_clase, plot_confusion,
                             plot_residuos_vs_pred, reg_metrics)
 from src.pasos import Etapa, cli
 from src.preprocessing import CLASS_ORDER
 from src.salida import OPCIONES, nota, subtitulo, tabla
 
-from etapas import e02_clasificacion as e02
-from etapas import e03_regresion as e03
 
 tf.config.experimental.enable_op_determinism()
 
 etapa = Etapa("08", "Redes neuronales con Keras (clasificación y regresión)", "redes_neuronales",
               "Perceptrón multicapa: 3 arquitecturas, early stopping y 5 semillas",
-              globales=("RANDOM_STATE", "e02.datos", "e03.datos", "VAL_FRAC", "SEMILLAS"))
+              globales=("RANDOM_STATE", "splits.datos_clf", "splits.datos_reg", "VAL_FRAC", "SEMILLAS"))
 
 ARQUITECTURAS = {"pequeña": [32], "media": [64, 32], "grande": [128, 64, 32]}
 SEMILLAS = [42, 43, 44, 45, 46]   # la primera es la del "modelo final"
@@ -101,15 +99,15 @@ _estado = {}
 # Datos: sub-train / validación / test, escalados con el sub-train
 # ----------------------------------------------------------------------------
 def datos(tarea: str) -> dict:
-    """Arrays listos para Keras. La validación sale del TRAIN; el test es el de e02/e03."""
+    """Arrays listos para Keras. La validación sale del TRAIN; el test es el de src/splits.py."""
     if tarea not in _estado:
         if tarea == "regresion":
-            d = e03.datos()
+            d = splits.datos_reg()
             X_tr, X_te, y_tr, y_te = d["X_train"], d["X_test"], d["y_train"], d["y_test"]
-            estratos = pd.qcut(y_tr, q=10, labels=False)     # deciles de peso, como e03
+            estratos = pd.qcut(y_tr, q=10, labels=False)     # deciles de peso, como el split
         else:
-            d = e02.datos()
-            quitar = [] if tarea == "clasificacion_A" else e02.DROP_WH
+            d = splits.datos_clf()
+            quitar = [] if tarea == "clasificacion_A" else splits.DROP_WH
             X_tr, X_te = d["X_train"].drop(columns=quitar), d["X_test"].drop(columns=quitar)
             codigo = {c: i for i, c in enumerate(CLASS_ORDER)}
             y_tr, y_te = d["y_train"].map(codigo), d["y_test"].map(codigo)
@@ -430,13 +428,13 @@ def paso_3_1_final_A():
 
 
 @etapa.paso("4", "Clasificación B: comparación de las 3 arquitecturas (validación) y curvas de pérdida",
-            figuras=1, parametros=("ARQUITECTURAS", "SEMILLAS", "_comparar", "e02.DROP_WH"))
+            figuras=1, parametros=("ARQUITECTURAS", "SEMILLAS", "_comparar", "splits.DROP_WH"))
 def paso_4_comparacion_B():
     _paso_comparacion("clasificacion_B", "4_curvas_perdida_B")
 
 
 @etapa.paso("4.1", "Clasificación B: red elegida en test (semilla 42 y media ± desv. de 5 semillas)",
-            figuras=1, parametros=("ARQUITECTURAS", "SEMILLAS", "e02.DROP_WH"))
+            figuras=1, parametros=("ARQUITECTURAS", "SEMILLAS", "splits.DROP_WH"))
 def paso_4_1_final_B():
     _paso_final_clf("clasificacion_B", "B")
 

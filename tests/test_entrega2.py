@@ -41,11 +41,21 @@ def test_parametros_declarados_apuntan_a_su_definicion():
             assert f"def {corto}(" in linea or linea.startswith(f"{corto} ="), (nombre, linea)
 
 
-def test_run_all_y_main_conocen_las_nueve_etapas():
+def test_run_all_y_main_conocen_las_cuatro_etapas():
     import run_all
-    assert [m[1:3] for m in run_all.MODULOS] == [f"{i:02d}" for i in range(1, 10)]
+    assert [m[1:3] for m in run_all.MODULOS] == ["06", "07", "08", "09"]
     import main
-    assert list(main._cargar_etapas()) == [f"{i:02d}" for i in range(1, 10)]
+    assert list(main._cargar_etapas()) == ["06", "07", "08", "09"]
+
+
+def test_splits_son_los_de_la_entrega_1():
+    """Mismas huellas de test que la Entrega 1 (data/resultados_entrega1.csv)."""
+    from src import resultados, splits
+    c, r = splits.datos_clf(), splits.datos_reg()
+    assert (len(c["X_train"]), len(c["X_test"]), len(r["X_train"]), len(r["X_test"])) == (1669, 418, 1669, 418)
+    assert resultados.huella_test(c["X_test"].index) == "8d9af7b40ee9"
+    assert resultados.huella_test(r["X_test"].index) == "021799f95367"
+    assert "NObeyesdad" not in r["X"].columns
 
 
 # ----------------------------------------------------------------------------
@@ -64,9 +74,10 @@ def test_csv_con_el_esquema_comun(res):
         assert list(pd.read_csv(ruta).columns) == res.COLUMNAS, ruta.name
 
 
-def test_entrega1_congelada_coincide_con_resultados_texto(res):
-    actual = res.construir_entrega1(*res._huellas_split())
-    pd.testing.assert_frame_equal(res.leer(res.RESULTADOS_E1), actual, check_dtype=False)
+def test_entrega1_congelada_sin_modificar(res):
+    import hashlib
+    from etapas import e09_comparacion_final as e09
+    assert hashlib.sha256(res.RESULTADOS_E1.read_bytes()).hexdigest() == e09.HUELLA_E1
 
 
 def test_mismo_test_de_418_dentro_de_cada_tarea(res):

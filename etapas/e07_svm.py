@@ -11,9 +11,9 @@ trabaja implícitamente en un espacio transformado:
 SVR usa la misma idea para regresión: un "tubo" de ancho epsilon alrededor de la predicción
 dentro del cual el error no se penaliza; los vectores de soporte son los puntos fuera del tubo.
 
-Protocolo (el de las etapas 02 y 03, reutilizando sus splits):
-- Clasificación: split de `e02.datos()` (1669/418, estratificado por clase), variantes A y B.
-- Regresión: split de `e03.datos()` (1669/418, estratificado por deciles de Weight), sin
+Protocolo (el de la Entrega 1, con sus mismos splits; ver src/splits.py):
+- Clasificación: split de `splits.datos_clf()` (1669/418, estratificado por clase), variantes A y B.
+- Regresión: split de `splits.datos_reg()` (1669/418, estratificado por deciles de Weight), sin
   NObeyesdad.
 - SIEMPRE Pipeline(StandardScaler, SVC/SVR): la SVM depende de distancias y productos
   escalares, así que sin escalar dominarían los atributos de mayor rango (Weight en kg).
@@ -53,19 +53,17 @@ from sklearn.preprocessing import FunctionTransformer, StandardScaler
 from sklearn.svm import SVC, SVR
 
 from config import RANDOM_STATE
-from src import cache, resultados
+from src import cache, resultados, splits
 from src.evaluation import (clf_metrics, metricas_por_clase, plot_confusion,
                             plot_residuos_vs_pred, reg_metrics, results_table)
 from src.pasos import Etapa, cli
 from src.preprocessing import CLASS_ORDER
 from src.salida import OPCIONES, nota, subtitulo, tabla
 
-from etapas import e02_clasificacion as e02
-from etapas import e03_regresion as e03
 
 etapa = Etapa("07", "SVM: clasificación (SVC) y regresión (SVR)", "svm",
               "Kernels linear, poly y rbf en las variantes A y B y en la regresión de Weight",
-              globales=("RANDOM_STATE", "e02.datos", "e03.datos", "e02.cv_estratificado"))
+              globales=("RANDOM_STATE", "splits.datos_clf", "splits.datos_reg", "splits.cv_estratificado"))
 
 KERNELS = ["linear", "poly", "rbf"]
 COLORES_KERNEL = {"linear": "#4c78a8", "poly": "#f58518", "rbf": "#54a24b"}
@@ -108,7 +106,7 @@ def fit_evaluate(X_tr, y_tr, X_te, y_te, tag):
     """GridSearchCV de cada kernel. Devuelve (fitted, tabla_resultados)."""
     fitted, results = {}, {}
     for kernel, (model, grid) in make_models().items():
-        gs = GridSearchCV(model, grid, cv=e02.cv_estratificado(), scoring="f1_macro", n_jobs=-1)
+        gs = GridSearchCV(model, grid, cv=splits.cv_estratificado(), scoring="f1_macro", n_jobs=-1)
         gs.fit(X_tr, y_tr)
         fitted[kernel] = gs
         svc = gs.best_estimator_.named_steps["svc"]
@@ -124,11 +122,11 @@ def fit_evaluate(X_tr, y_tr, X_te, y_te, tag):
 
 def variante(tag: str):
     """'A' = todas las features, 'B' = sin Weight/Height. Devuelve (fitted, tabla, X_tr, X_te)."""
-    d = e02.datos()
+    d = splits.datos_clf()
     if tag == "A":
         X_tr, X_te = d["X_train"], d["X_test"]
     else:
-        X_tr, X_te = d["X_train"].drop(columns=e02.DROP_WH), d["X_test"].drop(columns=e02.DROP_WH)
+        X_tr, X_te = d["X_train"].drop(columns=splits.DROP_WH), d["X_test"].drop(columns=splits.DROP_WH)
     fitted, tabla_res = cache.obtener(
         f"svm_clf_{tag}", lambda: fit_evaluate(X_tr, d["y_train"], X_te, d["y_test"], tag))
     return fitted, tabla_res, X_tr, X_te
@@ -146,7 +144,7 @@ def _tabla_kernels(fitted, t):
 
 def _reportes(tag: str):
     fitted, _, _, X_te = variante(tag)
-    y_test = e02.datos()["y_test"]
+    y_test = splits.datos_clf()["y_test"]
     sufijo = "A" if tag == "A" else "B, sin Weight/Height"
     for kernel, gs in fitted.items():
         subtitulo(f"SVC {kernel} ({sufijo})")
@@ -196,7 +194,7 @@ def make_models_reg():
 
 def _ajustar_reg():
     """GridSearch de los 3 kernels + baseline. Devuelve (fitted, tabla)."""
-    d = e03.datos()
+    d = splits.datos_reg()
     X_tr, X_te, y_tr, y_te = d["X_train"], d["X_test"], d["y_train"], d["y_test"]
     n_features = X_tr.shape[1]
     cv = KFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
@@ -228,9 +226,9 @@ def modelos_reg():
 # ----------------------------------------------------------------------------
 # 1. Datos y split
 # ----------------------------------------------------------------------------
-@etapa.paso("1", "Datos y split: el de la etapa 02 (clasificación) y el de la 03 (regresión)")
+@etapa.paso("1", "Datos y split: clasificación (por clase) y regresión (por deciles de Weight)")
 def paso_1_datos():
-    dc, dr = e02.datos(), e03.datos()
+    dc, dr = splits.datos_clf(), splits.datos_reg()
     assert len(dc["X_train"]) == len(dr["X_train"]) == 1669 and len(dc["X_test"]) == len(dr["X_test"]) == 418
     assert "NObeyesdad" not in dr["X"].columns, "NObeyesdad no debe estar en la regresión"
     print("clasificación  train:", dc["X_train"].shape, "| test:", dc["X_test"].shape,
@@ -261,8 +259,8 @@ def paso_2_modelos():
 def _bordes():
     """macro-F1 / RMSE de CV de valores MÁS ALLÁ de los bordes de la grilla final, con el resto
     de hiperparámetros fijos en el óptimo: comprueba que el óptimo no sigue mejorando fuera."""
-    d, dr = e02.datos(), e03.datos()
-    XA, XB, y = d["X_train"], d["X_train"].drop(columns=e02.DROP_WH), d["y_train"]
+    d, dr = splits.datos_clf(), splits.datos_reg()
+    XA, XB, y = d["X_train"], d["X_train"].drop(columns=splits.DROP_WH), d["y_train"]
     cv_r = KFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
     casos = [
         ("A", "linear", {"svc__C": 3000}), ("A", "linear", {"svc__C": 10000}),
@@ -279,7 +277,7 @@ def _bordes():
                                  scoring="neg_root_mean_squared_error", n_jobs=-1).mean()
         else:
             modelo = make_models()[kernel][0].set_params(**params)
-            s = cross_val_score(modelo, XA if tarea == "A" else XB, y, cv=e02.cv_estratificado(),
+            s = cross_val_score(modelo, XA if tarea == "A" else XB, y, cv=splits.cv_estratificado(),
                                 scoring="f1_macro", n_jobs=-1).mean()
         filas.append({"tarea": tarea, "kernel": kernel,
                       "params probados": str({k.split("__")[-1]: v for k, v in params.items()}),
@@ -342,7 +340,7 @@ def paso_3_1_reportes_A():
 
 def _por_que_lineal():
     """macro-F1 de CV de un SVC con SÓLO Weight y Height, en kg/m y en logaritmos."""
-    d = e02.datos()
+    d = splits.datos_clf()
     X = d["X_train"][["Weight", "Height"]]
     log = FunctionTransformer(np.log, feature_names_out="one-to-one")
     casos = {
@@ -358,7 +356,7 @@ def _por_que_lineal():
         grid = {"svc__C": [0.1, 1, 10, 100, 1000]}
         if "rbf" in nombre:
             grid["svc__gamma"] = ["scale", 0.1, 1, 10]
-        gs = GridSearchCV(modelo, grid, cv=e02.cv_estratificado(), scoring="f1_macro", n_jobs=-1)
+        gs = GridSearchCV(modelo, grid, cv=splits.cv_estratificado(), scoring="f1_macro", n_jobs=-1)
         gs.fit(X, d["y_train"])
         filas[nombre] = {"cv_f1_macro": gs.best_score_, "mejores_params": str(_params(gs))}
     return pd.DataFrame.from_dict(filas, orient="index")
@@ -406,7 +404,7 @@ def paso_3_2_por_que_lineal():
             figuras=1, parametros=("make_models",))
 def paso_3_3_frontera_pca():
     fitted, _, X_tr, X_te = variante("A")
-    d = e02.datos()
+    d = splits.datos_clf()
     codigo = {c: i for i, c in enumerate(CLASS_ORDER)}
     y_tr = d["y_train"].map(codigo).to_numpy()
     y_te = d["y_test"].map(codigo).to_numpy()
@@ -464,7 +462,7 @@ def _tabla_sv(gs, X_tr, y_tr, titulo):
 @etapa.paso("3.4", "Vectores de soporte de los mejores modelos (A, B y regresión)",
             parametros=("make_models", "make_models_reg"))
 def paso_3_4_vectores_soporte():
-    y_tr = e02.datos()["y_train"]
+    y_tr = splits.datos_clf()["y_train"]
     for tag in ("A", "B"):
         fitted, t, X_tr, _ = variante(tag)
         k = mejor_kernel(t)
@@ -486,7 +484,7 @@ def paso_3_4_vectores_soporte():
 # 4. Clasificación B
 # ----------------------------------------------------------------------------
 @etapa.paso("4", "Clasificación B (sin Weight/Height): un GridSearch por kernel",
-            parametros=("make_models", "e02.DROP_WH"))
+            parametros=("make_models", "splits.DROP_WH"))
 def paso_4_variante_B():
     fitted, t, _, _ = variante("B")
     tabla(_tabla_kernels(fitted, t), "Variante B — SVC por kernel: CV, test, nº de vectores de soporte y tiempo")
@@ -494,7 +492,7 @@ def paso_4_variante_B():
 
 
 @etapa.paso("4.1", "Clasificación B: reportes por clase y matrices de confusión de los 3 kernels",
-            figuras=1, parametros=("make_models", "e02.DROP_WH"))
+            figuras=1, parametros=("make_models", "splits.DROP_WH"))
 def paso_4_1_reportes_B():
     _reportes("B")
 
@@ -534,7 +532,7 @@ def paso_6_regresion():
             parametros=("make_models_reg",))
 def paso_6_1_pred_vs_real():
     fitted, t = modelos_reg()
-    d = e03.datos()
+    d = splits.datos_reg()
     y_te = d["y_test"]
     preds = {f"SVR {k}": g.predict(d["X_test"]) for k, g in fitted.items()}
     lo = min(y_te.min(), min(p.min() for p in preds.values())) - 2
@@ -578,7 +576,7 @@ def paso_6_1_pred_vs_real():
 # ----------------------------------------------------------------------------
 @etapa.paso("7", "Guardar el mejor kernel (por CV) de A, B y regresión en data/resultados_entrega2.csv")
 def paso_7_guardar():
-    dc, dr = e02.datos(), e03.datos()
+    dc, dr = splits.datos_clf(), splits.datos_reg()
     filas = []
     for tag in ("A", "B"):
         fitted, t, _, _ = variante(tag)

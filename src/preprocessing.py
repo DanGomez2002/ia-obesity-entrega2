@@ -1,12 +1,12 @@
-"""Preprocesamiento base compartido por clasificación, regresión y clustering.
+"""Preprocesamiento base compartido por clasificación y regresión (el mismo de la Entrega 1).
 
 Encoding:
 - Binarias (yes/no, Male/Female)      -> 0/1
 - Ordinales CAEC y CALC               -> 0..3 (no < Sometimes < Frequently < Always)
 - Nominal MTRANS                      -> one-hot (5 columnas; drop_first=False para
                                          que los árboles vean cada categoría)
-- Numéricas                           -> se dejan tal cual. El ESCALADO (que KNN y
-                                         K-Means sí necesitan) se hace dentro del
+- Numéricas                           -> se dejan tal cual. El ESCALADO (que SVM y la
+                                         red neuronal sí necesitan) se hace dentro del
                                          Pipeline de cada modelo, ajustado sólo con
                                          el train, para no filtrar información del test.
 
@@ -14,7 +14,7 @@ Se eliminan las filas duplicadas exactas (24) antes de cualquier split.
 """
 import pandas as pd
 
-from src.data import TARGET_CLF, TARGET_REG, CLF_CSV, REG_CSV, load_raw
+from src.data import TARGET_CLF, TARGET_REG, load_raw
 
 # Orden "natural" de las clases (de menor a mayor IMC). Se usa en todos los gráficos.
 CLASS_ORDER = [
@@ -70,14 +70,14 @@ def build_datasets(df_raw: pd.DataFrame):
 
 
 def cargar_clf() -> pd.DataFrame:
-    """Dataset de clasificación: lee data/clf.csv o lo regenera si no existe."""
-    df = pd.read_csv(CLF_CSV) if CLF_CSV.exists() else build_datasets(load_raw())[0]
+    """Dataset de clasificación, construido desde data/obesity_raw.csv."""
+    df = build_datasets(load_raw())[0]
     df[TARGET_CLF] = pd.Categorical(df[TARGET_CLF], categories=CLASS_ORDER)
     return df
 
 
 def cargar_reg() -> pd.DataFrame:
-    """Dataset de regresión: lee data/reg.csv o lo regenera si no existe."""
-    df = pd.read_csv(REG_CSV) if REG_CSV.exists() else build_datasets(load_raw())[1]
+    """Dataset de regresión (sin NObeyesdad), construido desde data/obesity_raw.csv."""
+    df = build_datasets(load_raw())[1]
     assert TARGET_CLF not in df.columns, "NObeyesdad no debe estar en el dataset de regresión"
     return df

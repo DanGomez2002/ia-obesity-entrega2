@@ -80,10 +80,10 @@ def test_un_archivo_de_cache_corrupto_se_recalcula(modulo, tmp_path):
 
 
 def test_la_huella_de_una_etapa_incluye_src_y_config():
-    from etapas import e02_clasificacion as e02
-    archivos = cache.archivos_de(e02._barrido_n_arboles)
+    from etapas import e06_naive_bayes as e06
+    archivos = cache.archivos_de(e06._escalado)
     nombres = {p.as_posix() for p in archivos}
-    assert "etapas/e02_clasificacion.py" in nombres
-    assert {"src/evaluation.py", "src/preprocessing.py", "config.py"} <= nombres
-    assert not any(n.startswith(("etapas/e03", "etapas/e04", "webapp/")) for n in nombres)
+    assert "etapas/e06_naive_bayes.py" in nombres
+    assert {"src/evaluation.py", "src/preprocessing.py", "src/splits.py", "config.py"} <= nombres
+    assert not any(n.startswith(("etapas/e07", "etapas/e08")) for n in nombres)
     assert not any(".venv" in n for n in nombres)

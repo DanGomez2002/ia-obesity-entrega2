@@ -47,11 +47,6 @@ _PASOS_INICIADOS = set()
 OPCIONES = {"mostrar": True, "guardar": True, "graficar_tablas": True}
 _backend_listo = False
 
-# Receptor opcional de la salida (p. ej. una interfaz gráfica). Si es None todo va a
-# la consola como siempre; si no, títulos, notas, tablas y figuras se le entregan a él con
-# sus métodos titulo(texto), subtitulo(texto), nota(texto), tabla(df, titulo) y figura(fig, nombre).
-RECEPTOR = None
-
 # Etapa/paso en curso: lo fija src/pasos.py para poder nombrar las figuras de las tablas
 _CONTEXTO = {"carpeta": "tablas_sueltas", "paso": "suelta", "n_tabla": 0}
 
@@ -144,9 +139,7 @@ def mostrar(fig, nombre: str, etapa: str, ventana: bool | None = None, datos=Non
         print(f"   [figura guardada] {ruta.relative_to(FIG_DIR.parent)}")
         if not es_tabla:
             _guardar_figura_texto(fig, nombre, etapa, datos=datos)
-    if RECEPTOR is not None and ventana is not False:
-        RECEPTOR.figura(fig, nombre)
-    elif abrir:
+    if abrir:
         print("   [ventana abierta] cierra la ventana de la gráfica para continuar...")
         # Variable de entorno para pruebas automáticas: cierra la ventana sola tras N ms
         auto_ms = os.environ.get("IA2_AUTOCERRAR_MS")
@@ -162,23 +155,17 @@ def mostrar(fig, nombre: str, etapa: str, ventana: bool | None = None, datos=Non
 # ---------- Texto ----------
 
 def titulo(texto: str):
-    if RECEPTOR is not None:
-        return RECEPTOR.titulo(texto)
     print("\n" + "=" * 100)
     print(texto)
     print("=" * 100)
 
 
 def subtitulo(texto: str):
-    if RECEPTOR is not None:
-        return RECEPTOR.subtitulo(texto)
     print("\n--- " + texto + " ---")
 
 
 def nota(texto: str):
     """Imprime una explicación (equivalente a las celdas markdown del notebook)."""
-    if RECEPTOR is not None:
-        return RECEPTOR.nota(textwrap.dedent(texto).strip())
     print()
     for parrafo in textwrap.dedent(texto).strip().split("\n\n"):
         lineas = parrafo.splitlines()
@@ -201,9 +188,7 @@ def tabla(df, titulo_tabla: str | None = None, decimales: int = 4, grafica: bool
     if isinstance(df, pd.Series):
         df = df.to_frame()
     d = df.round(decimales)
-    if RECEPTOR is not None and texto:
-        RECEPTOR.tabla(d, titulo_tabla)
-    elif texto:
+    if texto:
         if titulo_tabla:
             subtitulo(titulo_tabla)
         with pd.option_context("display.max_rows", 200, "display.max_columns", 40,

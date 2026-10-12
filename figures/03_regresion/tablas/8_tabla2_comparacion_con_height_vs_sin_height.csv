@@ -1,9 +1,0 @@
-,,cv_RMSE,test_MAE,test_RMSE,test_R2,test_R2_adj
-Con Height,Baseline (media),—,21.7064,25.9126,-0.0001,-0.0479
-Con Height,Árbol de regresión,12.4728,6.5810,10.4655,0.8369,0.8291
-Con Height,Random Forest,9.1156,4.8386,8.2468,0.8987,0.8939
-Con Height,KNN,10.3709,5.0484,9.9085,0.8538,0.8468
-Sin Height,Baseline (media),—,21.7064,25.9126,-0.0001,-0.0453
-Sin Height,Árbol de regresión,13.9102,7.4358,12.4959,0.7674,0.7569
-Sin Height,Random Forest,10.0641,5.1956,8.7201,0.8867,0.8816
-Sin Height,KNN,11.6993,5.7985,10.4938,0.8360,0.8286

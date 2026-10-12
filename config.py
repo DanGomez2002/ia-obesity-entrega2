@@ -7,11 +7,11 @@ from pathlib import Path
 
 # Carpeta raíz del proyecto (donde está este archivo)
 ROOT = Path(__file__).resolve().parent
-DATA_DIR = ROOT / "data"        # dataset crudo + clf.csv / reg.csv generados
+DATA_DIR = ROOT / "data"        # dataset crudo + resultados de las entregas 1 y 2
 FIG_DIR = ROOT / "figures"      # PNG de cada gráfica, por etapa
 CACHE_DIR = ROOT / "cache"      # modelos ya entrenados (GridSearch), para no repetir
 
-# Semilla única para todo el proyecto: splits, árboles, RF, K-Means, ruido.
+# Semilla única para todo el proyecto: splits, validación cruzada y redes neuronales.
 # Con 42 los números coinciden exactamente con los notebooks originales.
 RANDOM_STATE = 42
 

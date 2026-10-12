@@ -5,9 +5,10 @@ Naive Bayes no tiene versión de regresión: es un clasificador que aplica el te
 P(clase | x) ∝ P(clase) · Π_j P(x_j | clase) suponiendo que los atributos son INDEPENDIENTES
 dada la clase. Se usan las implementaciones de scikit-learn.
 
-Protocolo (el mismo de la etapa 02, reutilizando su split):
-- Mismo split estratificado 80/20 de la etapa 02 (`e02.datos()`, random_state=42): 1669/418.
-- Hiperparámetros con GridSearchCV (5-fold estratificado de la etapa 02, criterio macro-F1).
+Protocolo (el de la Entrega 1, con su mismo split; ver src/splits.py):
+- Split estratificado 80/20 (`splits.datos_clf()`, random_state=42): 1669 train / 418 test.
+- Hiperparámetros con GridSearchCV (5-fold estratificado, `splits.cv_estratificado()`,
+  criterio macro-F1).
 - El NB que pasa a la comparación final se elige por macro-F1 de CV, NUNCA por el test.
 - Métricas en test: accuracy, macro-F1, classification_report, matriz de confusión y, por ser
   un modelo probabilístico, log-loss.
@@ -27,7 +28,7 @@ Dos Naive Bayes:
 Sin escalado: Naive Bayes estima cada atributo por separado (media/varianza o frecuencias por
 clase), así que reescalar un atributo no cambia sus predicciones (ver paso 1).
 
-Dos variantes, como en la etapa 02: A (todas las features) y B (sin Weight ni Height).
+Dos variantes, como en la Entrega 1: A (todas las features) y B (sin Weight ni Height).
 
 Pasos:
   1    Datos y split (y por qué no hace falta escalar)
@@ -56,17 +57,16 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import KBinsDiscretizer, StandardScaler
 
 from config import RANDOM_STATE
-from src import cache, resultados
+from src import cache, resultados, splits
 from src.evaluation import clf_metrics, metricas_por_clase, plot_confusion, results_table
 from src.pasos import Etapa, cli
 from src.preprocessing import CLASS_ORDER, NUMERIC_COLS
 from src.salida import OPCIONES, nota, subtitulo, tabla
 
-from etapas import e02_clasificacion as e02
 
 etapa = Etapa("06", "Naive Bayes (clasificación)", "naive_bayes",
-              "GaussianNB vs CategoricalNB en las variantes A y B de la etapa 02",
-              globales=("RANDOM_STATE", "e02.datos", "e02.cv_estratificado"))
+              "GaussianNB vs CategoricalNB en las variantes A y B",
+              globales=("RANDOM_STATE", "splits.datos_clf", "splits.cv_estratificado"))
 
 # KBinsDiscretizer avisa cuando un tramo por cuantiles queda vacío y lo elimina (pasa con
 # atributos casi enteros como FCVC o NCP). Es lo esperado: se queda con menos tramos.
@@ -108,7 +108,7 @@ def fit_evaluate(X_tr, y_tr, X_te, y_te, tag):
     """Ajusta los 2 NB con GridSearchCV y devuelve (fitted, tabla_resultados)."""
     fitted, results = {}, {}
     for name, (model, grid) in make_models(X_tr.columns).items():
-        gs = GridSearchCV(model, grid, cv=e02.cv_estratificado(), scoring="f1_macro", n_jobs=-1)
+        gs = GridSearchCV(model, grid, cv=splits.cv_estratificado(), scoring="f1_macro", n_jobs=-1)
         gs.fit(X_tr, y_tr)
         y_pred = gs.predict(X_te)
         fitted[name] = gs
@@ -132,11 +132,11 @@ def _params(gs) -> dict:
 
 def variante(tag: str):
     """'A' = todas las features, 'B' = sin Weight/Height. Devuelve (fitted, tabla, X_tr, X_te)."""
-    d = e02.datos()
+    d = splits.datos_clf()
     if tag == "A":
         X_tr, X_te = d["X_train"], d["X_test"]
     else:
-        X_tr, X_te = d["X_train"].drop(columns=e02.DROP_WH), d["X_test"].drop(columns=e02.DROP_WH)
+        X_tr, X_te = d["X_train"].drop(columns=splits.DROP_WH), d["X_test"].drop(columns=splits.DROP_WH)
     fitted, tabla_res = cache.obtener(
         f"nb_variante_{tag}", lambda: fit_evaluate(X_tr, d["y_train"], X_te, d["y_test"], tag))
     return fitted, tabla_res, X_tr, X_te
@@ -151,7 +151,7 @@ def elegido(tag: str) -> str:
 def _reportes(tag: str):
     """classification_report, matrices de confusión y métricas por clase de los 2 NB."""
     fitted, _, _, X_te = variante(tag)
-    y_test = e02.datos()["y_test"]
+    y_test = splits.datos_clf()["y_test"]
     sufijo = "A" if tag == "A" else "B, sin Weight/Height"
     for name, gs in fitted.items():
         subtitulo(f"{name} ({sufijo})")
@@ -176,25 +176,25 @@ def _reportes(tag: str):
 # ----------------------------------------------------------------------------
 def _escalado():
     """GaussianNB con y sin StandardScaler: macro-F1 de CV (mismo GridSearch de var_smoothing)."""
-    d = e02.datos()
+    d = splits.datos_clf()
     grid = {"var_smoothing": np.logspace(-12, 0, 13)}
     filas = {}
     for tag in ("A", "B"):
-        X = d["X_train"] if tag == "A" else d["X_train"].drop(columns=e02.DROP_WH)
+        X = d["X_train"] if tag == "A" else d["X_train"].drop(columns=splits.DROP_WH)
         for nombre, modelo, g in (
                 ("sin escalar", GaussianNB(), grid),
                 ("con StandardScaler", Pipeline([("scaler", StandardScaler()), ("nb", GaussianNB())]),
                  {f"nb__{k}": v for k, v in grid.items()})):
-            gs = GridSearchCV(modelo, g, cv=e02.cv_estratificado(), scoring="f1_macro", n_jobs=-1)
+            gs = GridSearchCV(modelo, g, cv=splits.cv_estratificado(), scoring="f1_macro", n_jobs=-1)
             gs.fit(X, d["y_train"])
             filas[(tag, nombre)] = {"cv_f1_macro": gs.best_score_,
                                     "mejor var_smoothing": float(list(gs.best_params_.values())[0])}
     return pd.DataFrame(filas).T
 
 
-@etapa.paso("1", "Datos y split estratificado 80/20 (el de la etapa 02) y por qué no se escala")
+@etapa.paso("1", "Datos y split estratificado 80/20 y por qué no se escala")
 def paso_1_datos():
-    d = e02.datos()
+    d = splits.datos_clf()
     assert len(d["X_train"]) == 1669 and len(d["X_test"]) == 418, "el split debe ser 1669/418"
     print("train:", d["X_train"].shape, "| test:", d["X_test"].shape)
     print("features:", d["X"].columns.tolist())
@@ -243,7 +243,7 @@ def paso_1_datos():
 
 @etapa.paso("1.1", "El supuesto de independencia condicional y por qué no se cumple aquí", figuras=1)
 def paso_1_1_independencia():
-    d = e02.datos()
+    d = splits.datos_clf()
     tr = d["X_train"].assign(clase=d["y_train"].values)
     imc = tr["Weight"] / tr["Height"] ** 2
 
@@ -268,7 +268,7 @@ def paso_1_1_independencia():
         g = tr[tr["clase"] == clase]
         ax.scatter(g["Height"], g["Weight"], s=10, alpha=0.6, color=color, label=clase)
     h = np.linspace(tr["Height"].min(), tr["Height"].max(), 100)
-    for corte in (18.5, 25, 27.5, 30, 35, 40):   # cortes de IMC (los de e02, paso 8)
+    for corte in (18.5, 25, 27.5, 30, 35, 40):   # cortes de IMC (OMS) entre clases
         ax.plot(h, corte * h ** 2, "k--", lw=0.8, alpha=0.6)
     ax.set_xlabel("Height (m)")
     ax.set_ylabel("Weight (kg)")
@@ -299,7 +299,7 @@ def paso_1_1_independencia():
 @etapa.paso("2", "Definición de modelos y grillas de hiperparámetros",
             parametros=("make_models", "MIN_CATEGORIAS", "N_BINS"))
 def paso_2_modelos():
-    for name, (model, grid) in make_models(e02.datos()["X"].columns).items():
+    for name, (model, grid) in make_models(splits.datos_clf()["X"].columns).items():
         subtitulo(name)
         print("   modelo:", model)
         for k, v in grid.items():
@@ -357,14 +357,14 @@ def paso_3_2_hiperparametros():
 # 4. Variante B
 # ----------------------------------------------------------------------------
 @etapa.paso("4", "Variante B (sin Weight/Height): GridSearch y tabla de resultados",
-            parametros=("make_models", "e02.DROP_WH"))
+            parametros=("make_models", "splits.DROP_WH"))
 def paso_4_variante_B():
     _, tabla_B, _, _ = variante("B")
     tabla(tabla_B, "Variante B — macro-F1 en CV, métricas en test, log-loss y tiempo")
 
 
 @etapa.paso("4.1", "Variante B: reportes por clase y matrices de confusión (test)", figuras=1,
-            parametros=("make_models", "e02.DROP_WH"))
+            parametros=("make_models", "splits.DROP_WH"))
 def paso_4_1_reportes_B():
     _reportes("B")
 
@@ -406,7 +406,7 @@ def paso_5_comparacion():
 # ----------------------------------------------------------------------------
 @etapa.paso("6", "Guardar el Naive Bayes elegido de A y B en data/resultados_entrega2.csv")
 def paso_6_guardar():
-    d = e02.datos()
+    d = splits.datos_clf()
     filas = []
     for tag in ("A", "B"):
         fitted, t, _, _ = variante(tag)

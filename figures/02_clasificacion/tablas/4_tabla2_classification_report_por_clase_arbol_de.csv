@@ -1,8 +1,0 @@
-,precision,recall,f1-score
-Insufficient_Weight,0.780,0.868,0.821
-Normal_Weight,0.604,0.509,0.552
-Overweight_Level_I,0.638,0.673,0.655
-Overweight_Level_II,0.660,0.603,0.631
-Obesity_Type_I,0.676,0.686,0.681
-Obesity_Type_II,0.815,0.883,0.848
-Obesity_Type_III,1.000,0.985,0.992

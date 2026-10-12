@@ -1,6 +1,6 @@
 """Mini-framework para organizar cada etapa en PASOS numerados.
 
-Cada etapa (e01_eda.py, e02_clasificacion.py, ...) crea una `Etapa` y registra
+Cada etapa (e06_naive_bayes.py, e07_svm.py, ...) crea una `Etapa` y registra
 funciones con el decorador `@etapa.paso("3.4", "título", figuras=4)`.
 La numeración coincide con las secciones de los notebooks originales,
 para que "ir a 3.4" signifique lo mismo en todos lados.
@@ -22,7 +22,7 @@ from typing import Callable
 from src import salida, cache
 
 # Raíz del proyecto (src/pasos.py está en <raiz>/src/), para mostrar rutas relativas
-# como "etapas/e02_clasificacion.py:412" en vez de una ruta absoluta.
+# como "etapas/e07_svm.py:412" en vez de una ruta absoluta.
 _RAIZ_PROYECTO = Path(__file__).resolve().parents[1]
 
 
@@ -56,11 +56,11 @@ def ubicar(nombre: str, espacio: dict) -> str:
     """'archivo:línea' donde se define `nombre`, buscado en el espacio de nombres de un módulo
     de etapa (el __globals__ de sus pasos). Sirve para funciones y clases (su `def`, aunque
     vengan de src/), variables del módulo (su asignación) y constantes importadas (como
-    RANDOM_STATE de config.py). Admite nombres con punto: 'e02.make_models'. Se calcula al
+    RANDOM_STATE de config.py). Admite nombres con punto: 'splits.DROP_WH'. Se calcula al
     vuelo, así que nunca se desactualiza; devuelve "" si no lo encuentra."""
     partes = nombre.split(".")
     archivo = espacio.get("__file__")
-    for parte in partes[:-1]:                 # 'e02.make_models' -> módulo e02
+    for parte in partes[:-1]:                 # 'splits.DROP_WH' -> módulo splits
         modulo = espacio.get(parte)
         if not inspect.ismodule(modulo):
             return ""
@@ -76,7 +76,7 @@ def ubicar(nombre: str, espacio: dict) -> str:
 
 
 def _linea_ubicaciones(nombres, espacio, titulo="") -> str:
-    """'N_ARBOLES etapas/e02_clasificacion.py:287 · make_models ...:96' (con 'titulo: '
+    """'N_BINS etapas/e06_naive_bayes.py:83 · make_models ...:88' (con 'titulo: '
     delante si se da uno)."""
     trozos = [f"{n} {ubicar(n, espacio) or '(no encontrado)'}" for n in nombres]
     if not trozos:
@@ -100,7 +100,7 @@ class Paso:
 
     @property
     def ubicacion(self) -> str:
-        """'etapas/e02_clasificacion.py:412 (hasta 431)': archivo (relativo a la raíz
+        """'etapas/e07_svm.py:412 (hasta 431)': archivo (relativo a la raíz
         del proyecto) y líneas donde empieza (el decorador @etapa.paso) y termina la
         función de este paso, obtenidas en tiempo de ejecución con
         inspect.getsourcelines() — nunca se escriben a mano, así que no se
@@ -212,10 +212,10 @@ class Etapa:
 def cli(etapa: Etapa):
     """Línea de comandos común a todas las etapas.
 
-    python etapas/e02_clasificacion.py              -> menú interactivo de la etapa
-    python etapas/e02_clasificacion.py --todo       -> ejecuta todos los pasos
-    python etapas/e02_clasificacion.py --paso 3.4   -> sólo ese paso (se pueden pasar varios)
-    python etapas/e02_clasificacion.py --lista      -> lista de pasos
+    python etapas/e07_svm.py              -> menú interactivo de la etapa
+    python etapas/e07_svm.py --todo       -> ejecuta todos los pasos
+    python etapas/e07_svm.py --paso 3.2   -> sólo ese paso (se pueden pasar varios)
+    python etapas/e07_svm.py --lista      -> lista de pasos
     Por defecto sólo MUESTRA: figuras en ventana y tablas/texto en la consola, sin escribir
     archivos. Opciones: --guardar (además guarda PNG en figures/ y tablas en
     resultados_texto/)  --sin-ventanas (no abre ventanas)  --limpiar-cache

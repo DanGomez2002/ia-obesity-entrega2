@@ -1,12 +1,12 @@
 """Ejecuta las etapas completas, sin abrir ventanas, y guarda todas las figuras en figures/.
 
-    python run_all.py                       # las 9 etapas; usa la caché de modelos si existe
-    python run_all.py --limpiar-cache       # recalcula todo desde cero (~30 min)
-    python run_all.py --etapas 06 07 08 09  # sólo esas etapas (p. ej. las de la Entrega 2)
+    python run_all.py                  # las 4 etapas; usa la caché de modelos si existe
+    python run_all.py --limpiar-cache  # recalcula todo desde cero (~20 min)
+    python run_all.py --etapas 07 09   # sólo esas etapas
 
-01-05 son la Entrega 1 y 06-09 la Entrega 2 (Naive Bayes, SVM, redes neuronales con Keras y
-la comparación final). Es la forma de reproducir el proyecto entero de una vez (equivalente
-al run_all.sh de la versión en notebooks).
+Etapas de la Entrega 2 (la numeración continúa la de la Entrega 1, que vive en su propio
+proyecto): 06 Naive Bayes, 07 SVM, 08 redes neuronales con Keras y 09 comparación final.
+Es la forma de reproducir el proyecto entero de una vez.
 """
 import argparse
 import importlib
@@ -18,8 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from src import cache, salida
 
-MODULOS = ["e01_eda", "e02_clasificacion", "e03_regresion", "e04_clustering", "e05_comparacion",
-           "e06_naive_bayes", "e07_svm", "e08_redes_neuronales", "e09_comparacion_final"]
+MODULOS = ["e06_naive_bayes", "e07_svm", "e08_redes_neuronales", "e09_comparacion_final"]
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Ejecuta las etapas del proyecto y guarda sus salidas")

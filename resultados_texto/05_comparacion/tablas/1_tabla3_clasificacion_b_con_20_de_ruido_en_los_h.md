@@ -1,9 +1,0 @@
-### Clasificación B con 20 % de ruido en los hábitos (test_accuracy_limpio = mismo modelo sin ruido)
-
-|                     |   test_accuracy_limpio |   test_accuracy |   test_f1_macro |
-|:--------------------|-----------------------:|----------------:|----------------:|
-| Árbol de decisión   |                 0.7464 |          0.6483 |          0.6427 |
-| Random Forest       |                 0.8565 |          0.7895 |          0.7801 |
-| KNN (k=1)           |                 0.7703 |          0.7368 |          0.725  |
-| KNN (k=3, distance) |                 0.7679 |          0.7679 |          0.7564 |
-

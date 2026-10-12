@@ -14,15 +14,15 @@ RAIZ = Path(__file__).resolve().parents[1]
 
 
 def test_cada_paso_indica_su_linea_de_inicio_y_de_fin():
-    from etapas import e02_clasificacion as e02
-    for paso in e02.etapa.pasos:
+    from etapas import e07_svm as e07
+    for paso in e07.etapa.pasos:
         lineas, inicio = inspect.getsourcelines(paso.fn)
         fin = inicio + len(lineas) - 1
-        assert paso.ubicacion == f"etapas/e02_clasificacion.py:{inicio} (hasta {fin})"
-        fuente = (RAIZ / "etapas/e02_clasificacion.py").read_text(encoding="utf-8").splitlines()
+        assert paso.ubicacion == f"etapas/e07_svm.py:{inicio} (hasta {fin})"
+        fuente = (RAIZ / "etapas/e07_svm.py").read_text(encoding="utf-8").splitlines()
         assert fuente[inicio - 1].startswith(f'@etapa.paso("{paso.id}"')
         assert fuente[fin - 1].strip()                       # última línea del cuerpo
-    assert "(hasta " in e02.etapa.pasos[0].etiqueta
+    assert "(hasta " in e07.etapa.pasos[0].etiqueta
 
 
 def _entradas(carpeta):
@@ -32,12 +32,12 @@ def _entradas(carpeta):
 def test_ejecutar_un_paso_solo_muestra_y_no_escribe_archivos():
     carpetas = [RAIZ / "figures", RAIZ / "resultados_texto"]
     antes = [_entradas(c) for c in carpetas]
-    r = subprocess.run([sys.executable, "etapas/e01_eda.py", "--paso", "2.1", "--sin-ventanas"],
+    r = subprocess.run([sys.executable, "etapas/e06_naive_bayes.py", "--paso", "1.1", "--sin-ventanas"],
                        cwd=RAIZ, capture_output=True, text=True, encoding="utf-8",
                        env={**os.environ, "MPLBACKEND": "Agg", "PYTHONIOENCODING": "utf-8"},
                        timeout=300)
     assert r.returncode == 0, r.stderr
-    assert "Distribución de las 7 clases" in r.stdout and "Filas por clase" in r.stdout
+    assert "Dentro de cada clase Weight y Height siguen correlacionados" in r.stdout
     assert "[figura guardada]" not in r.stdout
     assert [_entradas(c) for c in carpetas] == antes
 
@@ -64,10 +64,9 @@ def test_guardar_tablas_tiene_sus_dependencias():
 # Dónde se modifican los parámetros de cada paso
 # ----------------------------------------------------------------------------
 def _etapas():
-    from etapas import (e01_eda, e02_clasificacion, e03_regresion, e04_clustering,
-                        e05_comparacion)
-    return [m.etapa for m in (e01_eda, e02_clasificacion, e03_regresion, e04_clustering,
-                              e05_comparacion)]
+    from etapas import e06_naive_bayes, e07_svm, e08_redes_neuronales, e09_comparacion_final
+    return [m.etapa for m in (e06_naive_bayes, e07_svm, e08_redes_neuronales,
+                              e09_comparacion_final)]
 
 
 def _linea(ubicacion):
@@ -88,38 +87,39 @@ def test_todos_los_parametros_declarados_apuntan_a_su_definicion():
             assert f"def {corto}(" in linea or linea.startswith(f"{corto} ="), (nombre, linea)
 
 
-def test_el_paso_de_numero_de_arboles_apunta_a_n_arboles():
-    from etapas import e02_clasificacion as e02
-    paso = e02.etapa.buscar("3.7")
-    assert "N_ARBOLES" in paso.parametros
-    assert paso.linea_parametros.startswith("N_ARBOLES etapas/e02_clasificacion.py:")
-    assert _linea(paso.linea_parametros.split()[1]).startswith("N_ARBOLES = [")
+def test_el_paso_de_la_grilla_apunta_a_n_bins():
+    from etapas import e06_naive_bayes as e06
+    paso = e06.etapa.buscar("2")
+    assert "N_BINS" in paso.parametros
+    ubicacion = paso.linea_parametros.split(" · ")[-1]
+    assert ubicacion.startswith("N_BINS etapas/e06_naive_bayes.py:")
+    assert _linea(ubicacion.split()[1]).startswith("N_BINS = [")
 
 
 def test_la_semilla_se_resuelve_en_config_y_va_en_la_cabecera(capsys):
-    from etapas import e02_clasificacion as e02
+    from etapas import e06_naive_bayes as e06
     from src.pasos import ubicar
-    assert _linea(ubicar("RANDOM_STATE", e02.etapa.pasos[0].fn.__globals__)).startswith(
+    assert _linea(ubicar("RANDOM_STATE", e06.etapa.pasos[0].fn.__globals__)).startswith(
         "RANDOM_STATE = ")
-    e02.etapa.listar()
+    e06.etapa.listar()
     salida_menu = capsys.readouterr().out.splitlines()
     cabecera = next(l for l in salida_menu if "Comunes a todos los pasos:" in l)
-    assert "RANDOM_STATE config.py:" in cabecera and "datos etapas/e02_clasificacion.py:" in cabecera
-    i = next(i for i, l in enumerate(salida_menu) if l.lstrip().startswith("[ 3.7]"))
-    assert salida_menu[i + 1].strip().startswith("N_ARBOLES etapas/e02_clasificacion.py:")
+    assert "RANDOM_STATE config.py:" in cabecera and "splits.datos_clf src/splits.py:" in cabecera
+    i = next(i for i, l in enumerate(salida_menu) if l.lstrip().startswith("[   2]"))
+    assert salida_menu[i + 1].strip().startswith("make_models etapas/e06_naive_bayes.py:")
 
 
 def test_un_paso_sin_parametros_externos_no_lleva_segunda_linea(capsys):
-    from etapas import e01_eda as e01
-    assert e01.etapa.buscar("2.2").linea_parametros == ""
-    e01.etapa.listar()
+    from etapas import e06_naive_bayes as e06
+    assert e06.etapa.buscar("1.1").linea_parametros == ""
+    e06.etapa.listar()
     lineas = capsys.readouterr().out.splitlines()
-    i = next(i for i, l in enumerate(lineas) if l.lstrip().startswith("[ 2.2]"))
-    assert lineas[i + 1].lstrip().startswith("[ 2.3]")
+    i = next(i for i, l in enumerate(lineas) if l.lstrip().startswith("[ 1.1]"))
+    assert lineas[i + 1].lstrip().startswith("[   2]")
 
 
-def test_los_nombres_con_punto_se_resuelven_en_otra_etapa():
-    from etapas import e05_comparacion as e05
+def test_los_nombres_con_punto_se_resuelven_en_otro_modulo():
+    from etapas import e07_svm as e07
     from src.pasos import ubicar
-    u = ubicar("e02.make_models", e05.etapa.pasos[0].fn.__globals__)
-    assert u.startswith("etapas/e02_clasificacion.py:") and "def make_models(" in _linea(u)
+    u = ubicar("splits.datos_clf", e07.etapa.pasos[0].fn.__globals__)
+    assert u.startswith("src/splits.py:") and "def datos_clf(" in _linea(u)

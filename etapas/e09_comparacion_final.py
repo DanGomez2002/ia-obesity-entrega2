@@ -7,7 +7,9 @@ clasificación A (todas las features), clasificación B (sin Weight ni Height) y
 Weight.
 
 - Los resultados de la Entrega 1 NO se re-entrenan: se leen congelados de
-  data/resultados_entrega1.csv (construido en T1 a partir de resultados_texto/).
+  data/resultados_entrega1.csv, construido en T1 a partir de las salidas ejecutadas del
+  proyecto de la Entrega 1 (que vive en su propio repositorio). Una huella SHA-256 comprueba
+  que el archivo no se ha modificado desde entonces.
 - Los de la Entrega 2 se leen de data/resultados_entrega2.csv, que escriben las etapas
   06, 07 y 08 al terminar. Cada familia aporta el modelo que eligió por CV/validación.
 - Antes de comparar se comprueba que, dentro de cada tarea, todas las filas se evaluaron sobre
@@ -18,7 +20,7 @@ Todas las cifras de esta etapa se leen de esos archivos; las conclusiones se esc
 ellas (f-strings), no a mano. Si una etapa anterior cambia, esta cambia con ella.
 
 Pasos:
-  1    Carga y verificaciones (mismo test, recuentos, E1 congelada vs resultados_texto/)
+  1    Carga y verificaciones (mismo test, recuentos, E1 congelada sin modificar)
   1.1  Discrepancias con los valores de referencia del encargo
   2    Tablas por tarea: clasificación A, clasificación B y regresión
   3    Ranking y gráfica comparativa
@@ -26,6 +28,7 @@ Pasos:
   5    Conclusiones
 """
 import ast
+import hashlib
 import re
 import sys
 from pathlib import Path
@@ -36,9 +39,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from src import resultados
+from src import resultados, splits
 from src.pasos import Etapa, cli
-from etapas import e02_clasificacion as e02
 from src.salida import nota, subtitulo, tabla
 
 etapa = Etapa("09", "Comparación final de la Entrega 2", "comparacion_final",
@@ -52,6 +54,8 @@ BASELINE = "Baseline (media)"
 N_ESPERADO = {"clasificacion_A": 6, "clasificacion_B": 6, "regresion": 5}   # sin el baseline
 # Colores validados (paleta categórica, dos tonos): identidad = entrega, no el rango
 COLOR_ENTREGA = {"E1": "#2a78d6", "E2": "#eb6834"}
+# SHA-256 de data/resultados_entrega1.csv tal como se congeló en T1 (commit 2267801)
+HUELLA_E1 = "09d093c7245ddc3fc79cc67e1b7ac8be6605a9b83e0f6c36b116c8e309c04e55"
 
 # Valores de referencia que daba el ENCARGO de la Entrega 2 para la Entrega 1 (3 decimales en
 # clasificación y 2-3 en regresión). NO son resultados: sólo se contrastan con los ejecutados.
@@ -124,7 +128,7 @@ def tabla_tarea(tarea: str) -> pd.DataFrame:
 # 1. Carga y verificaciones
 # ----------------------------------------------------------------------------
 @etapa.paso("1", "Carga de los dos archivos de resultados y verificaciones (mismo test de 418)",
-            parametros=("N_ESPERADO",))
+            parametros=("N_ESPERADO", "HUELLA_E1"))
 def paso_1_carga():
     df = datos()
     print(f"Entrega 1 (congelada): {resultados.RESULTADOS_E1.name} · "
@@ -146,14 +150,13 @@ def paso_1_carga():
         assert t["huella_test"].nunique() == 1, f"{tarea}: NO todos los modelos usan el mismo test"
     tabla(pd.DataFrame.from_dict(filas, orient="index"), "Recuento y mismo test por tarea", grafica=False)
 
-    # ¿La E1 congelada sigue coincidiendo con lo que hay en resultados_texto/?
-    actual = resultados.construir_entrega1(*resultados._huellas_split())
-    congelada = resultados.leer(resultados.RESULTADOS_E1)
-    try:
-        pd.testing.assert_frame_equal(congelada, actual, check_dtype=False)
-        print("Entrega 1 congelada == tablas de resultados_texto/ de las etapas 02, 03 y 05: coincide.")
-    except AssertionError as e:
-        print(f"[DISCREPANCIA] la Entrega 1 congelada ya no coincide con resultados_texto/:\n{e}")
+    # ¿La E1 congelada sigue siendo exactamente el archivo de T1?
+    h = hashlib.sha256(resultados.RESULTADOS_E1.read_bytes()).hexdigest()
+    if h == HUELLA_E1:
+        print(f"Entrega 1 congelada sin modificar desde T1 (SHA-256 {h[:12]}…).")
+    else:
+        print(f"[DISCREPANCIA] {resultados.RESULTADOS_E1.name} cambió desde T1: SHA-256 {h[:12]}… "
+              f"en lugar de {HUELLA_E1[:12]}….")
     nota("""
     Clasificación y regresión tienen tests DISTINTOS (huellas distintas): el de clasificación
     está estratificado por clase y el de regresión por deciles de Weight, como en la Entrega 1.
@@ -184,8 +187,8 @@ def paso_1_1_discrepancias():
               f"ejecutado {r['ejecutado']:.4f}")
     if len(malas):
         nota("""
-        Las cifras correctas son las ejecutadas (resultados_texto/ de la Entrega 1, reproducidas
-        en T1 al volver a correr las etapas 02 y 03). Las discrepancias son de transcripción en
+        Las cifras correctas son las ejecutadas (salidas de la Entrega 1, reproducidas en T1 al
+        volver a correr sus modelos antes de congelarlas). Las discrepancias son de transcripción en
         el encargo, no de los modelos: el macro-F1 del árbol A coincide con su ACCURACY (0.938),
         y el del KNN B con su macro-F1 de VALIDACIÓN CRUZADA (0.764), no con el de test.
         """)
@@ -336,8 +339,8 @@ def paso_5_conclusiones():
     except (ValueError, KeyError, FileNotFoundError):
         rbf_wh = np.nan
     ep = {k: ast.literal_eval(nn[k]["mejores_params"])["mejor_epoca"] for k in ("A", "B", "R")}
-    X = e02.datos()["X"]
-    pct_sint = (1 - e02.filas_reales(X).mean()) * 100      # filas con respuestas no enteras
+    X = splits.datos_clf()["X"]
+    pct_sint = (1 - splits.filas_reales(X).mean()) * 100      # filas con respuestas no enteras
     clu = _estado["clustering"].set_index("modelo")
     clu_sin = clu[~clu["nota"].str.contains("fuga")]
     e2 = datos()[datos()["entrega"] == "E2"]
@@ -424,7 +427,7 @@ def paso_5_conclusiones():
     {'coinciden con los de test en las tres tareas' if (cvA, cvB, cvR) == (gA.name, gB.name, gR.name)
      else 'no coinciden con los de test en todas las tareas'} (sin contar la red, cuya validación
     es otra). Y el {pct_sint:.1f} % de las filas del dataset tiene respuestas de encuesta no enteras,
-    la marca de las filas generadas con SMOTE (etapa 02, paso 8), lo que hace que todas las
+    la marca de las filas generadas con SMOTE (ya analizado en la Entrega 1), lo que hace que todas las
     métricas sean optimistas respecto a datos reales.
 
     (7) K-MEANS (Entrega 1) no entra en la comparación porque no es supervisado. Como nota: sin
